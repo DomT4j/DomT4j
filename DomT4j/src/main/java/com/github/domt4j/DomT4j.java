@@ -4,7 +4,8 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 import org.fusesource.jansi.Ansi.Color;
 
-import cloud.jgo.£;
+
+import cloud.jgo.*;
 import cloud.jgo.jjdom.JjDom;
 import cloud.jgo.jjdom.dom.nodes.Comment;
 import cloud.jgo.jjdom.dom.nodes.Document;
@@ -12,18 +13,21 @@ import cloud.jgo.jjdom.dom.nodes.Element;
 import cloud.jgo.jjdom.dom.nodes.Node;
 import cloud.jgo.jjdom.dom.nodes.NodeList;
 import cloud.jgo.jjdom.dom.nodes.xml.XMLDocument;
-import cloud.jgo.utils.ColorString;
 import cloud.jgo.utils.command.LocalCommand;
 import cloud.jgo.utils.command.Parameter;
 import cloud.jgo.utils.command.execution.Execution;
 import cloud.jgo.utils.command.terminal.phase.DefaultPhase;
 import cloud.jgo.utils.command.terminal.phase.LocalPhaseTerminal;
 
+
+
 public class DomT4j extends LocalPhaseTerminal{
 
-	// esiste solo una instanza abbiamo detto 
-	// 1 cosa da risolvere : mi serve un oggetto configurazione
-	// per la creazione dei nodi e documenti, cosi da avere flessibilit£
+	
+	// per prima cosa, risolvere bug quando impostiamo il nome di un elemento
+	// dopo la creazione di un documento
+	
+	
 	
 	private static DomT4j instance = null ;
 	public final static String TERMINAL_NAME = £.colors("DomT4j",Color.GREEN);
@@ -40,15 +44,15 @@ public class DomT4j extends LocalPhaseTerminal{
 		return instance ;
 	}
 	
-	private static String error(String msg) {
+	static String error(String msg) {
 		return ansi().fg(Color.RED).a(msg+" #").reset().toString();
 	}
 	
-	private static String setOk(String var) {
+	static String setOk(String var) {
 		return ansi().fg(Color.WHITE).a("The "+var+" is set ("+ansi().fg(Color.CYAN).a("OK").reset()+")").reset().toString();
 	}
 	
-	private static String positiveMsg(String msg) {
+	static String positiveMsg(String msg) {
 		return ansi().fg(Color.WHITE).a(msg+" ("+ansi().fg(Color.CYAN).a("OK").reset()+")").reset().toString();
 	}
 	
@@ -63,23 +67,29 @@ public class DomT4j extends LocalPhaseTerminal{
 		Parameter.color = Color.YELLOW;
 		LocalCommand.color = Color.CYAN;
 		DefaultPhase.color = Color.MAGENTA;
-		LocalCommand createCommand;
+		final LocalCommand createCommand;
 		final LocalCommand cdCommand;
 		LocalCommand lsCommand, setCommand, getCommand;
 		// 1 comando : create
 		createCommand = new LocalCommand("create","This command creates a node");
 		// params :
 		final Parameter nodeTypeParam ;
+		final Parameter documentTypeParam;
+		final Parameter charsetDocumentParam;
 		Parameter nodeNameParam, nodeValueParam, appendParam;
 		nodeTypeParam = createCommand.addParam("nodeType","Specify the node type");
 		nodeNameParam = createCommand.addParam("nodeName","Specify the node name");
 		nodeValueParam = createCommand.addParam("nodeValue","Specify the node value");
 		appendParam = createCommand.addParam("append","appends to current node");
+		documentTypeParam = createCommand.addParam("type","Specify the document type");
+		charsetDocumentParam = createCommand.addParam("charset","Specify the document charset");
 		nodeTypeParam.setInputValueExploitable(true);
 		nodeNameParam.setInputValueExploitable(true);
 		nodeValueParam.setInputValueExploitable(true);
-		appendParam.setInputValueExploitable(true);
+		documentTypeParam.setInputValueExploitable(true);
+		charsetDocumentParam.setInputValueExploitable(true);
 		createCommand.setExecution(new Execution() {
+			@SuppressWarnings("static-access")
 			@Override
 			public Object exec() {
 				System.out.print("Specify the node type:");
@@ -142,31 +152,98 @@ public class DomT4j extends LocalPhaseTerminal{
 				return null;
 			}
 		});
-		// esecuzioni dei parametri
+		// esecuzioni dei parametri:nodeType
 		nodeTypeParam.setExecution(new Execution() {
 			@Override
 			public Object exec() {
-				if (instance.currentNode!=null) {
+				
 					String inputType = nodeTypeParam.getInputValue();
+					// in questo comando si crea il nodo, quindi la configurazione
+					NodeConfiguration config = new NodeConfiguration();
 					if (inputType!=null) {
-						Node node = null ;
-						if (inputType.equals("document")) {
-							// questo caso lo facciamo all'ultimo
-							// poich£ £ quello + problematico
+						boolean result = config.setNodeType(inputType);
+						if (result==false) {
+							return error("Node type is not valid - Available types= document|element|comment");
 						}
-						else if(inputType.equals("element")) {
-							
+						else {
+							// condivido l'oggetto
+							createCommand.shareObject(config);
+							return setOk(inputType);
 						}
-						else if(inputType.equals("comment")) {
+					}
+				return null ;
+			}
+		});
+		// esecuzioni dei parametri:documentType
+		documentTypeParam.setExecution(new Execution() {
+			@SuppressWarnings("static-access")
+			@Override
+			public Object exec() {
+				// qui mi devo assicurare in tanto che ci sia una config condivisa
+				// e inoltre verificare che quest'ultima punti a un documento
+				if (createCommand.getSharedObject()!=null) {
+					// mi assicuro che la config punti a un documento 
+					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+						// qui diamo per scontato che la configurazione intercettata
+						// abbia un valore, poichè senza specificare il tipo di nodo
+						// non si può creare proprio il nodo.
+						if (((NodeConfiguration)createCommand.getSharedObject()).getNodeType().equals("document")) {
+							if (documentTypeParam.getInputValue()!=null) {
+								boolean result = ((NodeConfiguration)createCommand.getSharedObject()).setDocumentType(documentTypeParam.getInputValue());
+								if (result==false) {
+									return error("Document type is not valid - Available types= html|xml");
+								}
+								else {
+									if (((NodeConfiguration)createCommand.getSharedObject()).isCompleted()) {
+										// sappiamo che la configurazione è completata
+										// quindi creo il documento e lo condivido
+										Document document = null ;
+										if (documentTypeParam.getInputValue().equals("html")) {
+											JjDom.newDocument().setMinimalTags().useDoctype(true).home().jqueryInit();
+											document = JjDom.document;
+										}
+										else {
+											// deve essere per forza un documento xml
+											document = new XMLDocument();
+										}
+										// condivido il documento questa volta
+										// cosi potrà essere appeso all'occorrenza
+										createCommand.shareObject(document);
+										return setOk("Document type");
+									}
+								}
+							}
 							
 						}
 						else {
-							return error("Node type is not valid - Available types= document|element|comment");
+							// da definire ...
 						}
+					}
+					else {
+						// da definire ...
 					}
 				}
 				else {
 					// da definire ...
+				}
+				return null ;
+			}
+		});
+		// esecuzioni dei parametri:append
+		appendParam.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				if (instance.currentNode!=null) {
+					// lo appendiamo nel nodo corrente
+				}
+				else {
+					// qui non c'è il nodo corrente
+					// quindi siamo all'inizio e quindi potrebbe trattarsi di un documento
+					if (createCommand.getSharedObject()instanceof Document) {
+						// okok c'è un documento condiviso, per cui
+						instance.currentNode = createCommand.getSharedObject(); // si tratta di un documento
+					}
 				}
 				return null ;
 			}
