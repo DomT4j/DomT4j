@@ -10,11 +10,11 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
-   <dependencies>
-  <dependency>
-  <groupId>cloud.jgo</groupId>
-  <artifactId>jGo</artifactId>
-  <version>1.0.9</version>
-  </dependency>
+  <dependencies>
+  	<dependency>
+  		<groupId>cloud.jgo</groupId>
+  		<artifactId>jGo</artifactId>
+  		<version>1.0.9</version>
+  	</dependency>
   </dependencies>
 </project>

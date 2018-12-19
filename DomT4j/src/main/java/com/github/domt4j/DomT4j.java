@@ -2,6 +2,8 @@ package com.github.domt4j;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+import javax.swing.JOptionPane;
+
 import org.fusesource.jansi.Ansi.Color;
 
 
