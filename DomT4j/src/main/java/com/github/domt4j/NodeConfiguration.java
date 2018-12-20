@@ -1,8 +1,8 @@
 package com.github.domt4j;
 
-import com.github.domt4j.config.Configuration;
 
-public class NodeConfiguration implements Configuration{
+
+public class NodeConfiguration{
 	
 	// questa classe serve per creare
 	// giusto le variabili necessarie minimali
