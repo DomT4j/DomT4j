@@ -7,6 +7,8 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import org.fusesource.jansi.Ansi.Color;
 
+import com.github.domt4j.config.ColorConfig;
+import com.github.domt4j.config.Config;
 import com.github.domt4j.config.DefaultDomT4jConfig;
 import com.github.domt4j.config.DomT4jConfig;
 
@@ -33,7 +35,7 @@ import cloud.jgo.utils.command.terminal.phase.LocalPhaseTerminal;
 public class DomT4j extends ColorLocalPhaseTerminal {
 
 	private static DomT4j instance = null;
-	public final static String TERMINAL_NAME = j£.colors("DomT4j", Color.GREEN);
+	public static String TERMINAL_NAME = null ;
 	public final static File CONF_DIR= new File("conf");  
 	public final static File CONF_FILE = new File(CONF_DIR,"domt4j.xml");
 
@@ -71,9 +73,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	private DomT4j() {}
 
 	private static void initTerminal() {
-		// qui parte la configurazione, quindi devo :
-		// 1 ottenere il file di configurazione 
-		// 2 se non c'è il file di configurazione, creare un nuovo file con la configurazione di default(oggetto)
+		/*
+		 * Config XML from HERE To §
+		 */
 		if (CONF_DIR.exists()) {
 			
 			// verifico se esiste il file di config
@@ -103,16 +105,30 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			£.convertFromObjectToXML(DomT4jConfig.class,"conf"+File.separator+"domt4j.xml",instance.configuration);
 			System.out.println("File di configurazione creato @");
 		}
-		
-		System.exit(0);
-		
+		// qui devo prendere tutti i valori della configurazione
+		/*
+		 		COLORS
+		 */
+		// command and parameter colors
+		ColorConfig parameterColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("parameter");
+		ColorConfig commandColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("command");
+		ColorConfig phaseColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("phase");
+		// configuro i colori inerenti ai comandi, parametri e fasi.
+		TerminalColors.PARAMETER_COLOR = parameterColorConfig.color;
+		TerminalColors.COMMAND_COLOR = commandColorConfig.color;
+		TerminalColors.PHASE_COLOR = phaseColorConfig.color;
+		// controllo se i colori sono diversi da un valore null
+		/*
+ 				TERMINAL.NAME
+		 */
+		TERMINAL_NAME = instance.configuration.terminalName;
 		instance.setName(TERMINAL_NAME);
+		/*
+		 * §
+		 */
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
 		LocalCommand.setInputHelpExploitable(true);
-		TerminalColors.PARAMETER_COLOR = Color.YELLOW;
-		TerminalColors.COMMAND_COLOR = Color.CYAN;
-		TerminalColors.PHASE_COLOR = Color.MAGENTA;
 		// imposto JjDom in modo tale che si adatti a un documento HTML colorato a
 		// livello di sintassi:
 		JjDom.documentTypeUsed = HTMLColorDocument.class;

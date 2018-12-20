@@ -8,9 +8,9 @@ import org.fusesource.jansi.Ansi.Color;
 public class ColorConfig implements Config{
 
 	@XmlElement
-	Color color ;
+	public Color color ;
 	@XmlElement
-	String target ;
+	public String target ;
 	
 	public ColorConfig() {
 		// TODO Auto-generated constructor stub

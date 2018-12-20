@@ -7,8 +7,9 @@ import org.fusesource.jansi.Ansi.Color;
 public class DefaultDomT4jConfig extends DomT4jConfig{
 
 	public DefaultDomT4jConfig() {
+		/* terminal.name*/
+		terminalName = "DomT4j";
 		/*colors config :*/
-		
 		// parameters and commands :
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.YELLOW,"parameter"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.CYAN,"command"));
