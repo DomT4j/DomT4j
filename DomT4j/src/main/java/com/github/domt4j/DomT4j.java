@@ -7,10 +7,10 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 import org.fusesource.jansi.Ansi.Color;
 
-import com.github.domt4j.config.ColorConfig;
 import com.github.domt4j.config.Config;
 import com.github.domt4j.config.DefaultDomT4jConfig;
 import com.github.domt4j.config.DomT4jConfig;
+import com.github.domt4j.config.colors.ColorConfig;
 
 import cloud.jgo.*;
 import cloud.jgo.io.File;
@@ -23,7 +23,6 @@ import cloud.jgo.jjdom.dom.nodes.Node;
 import cloud.jgo.jjdom.dom.nodes.NodeList;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.XMLDocument;
-import cloud.jgo.utils.command.LocalCommand;
 import cloud.jgo.utils.command.Parameter;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 import cloud.jgo.utils.command.execution.Execution;
@@ -35,7 +34,7 @@ import cloud.jgo.utils.command.terminal.phase.LocalPhaseTerminal;
 public class DomT4j extends ColorLocalPhaseTerminal {
 
 	private static DomT4j instance = null;
-	public static String TERMINAL_NAME = null ;
+	public static final String DEFAULT_TERMINAL_NAME = j£.colors("DomT4j",Color.CYAN);
 	public final static File CONF_DIR= new File("conf");  
 	public final static File CONF_FILE = new File(CONF_DIR,"domt4j.xml");
 
@@ -71,8 +70,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	}
 
 	private DomT4j() {}
-
-	private static void initTerminal() {
+	
+	private static void config() {
 		/*
 		 * Config XML from HERE To §
 		 */
@@ -113,30 +112,40 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		ColorConfig parameterColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("parameter");
 		ColorConfig commandColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("command");
 		ColorConfig phaseColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("phase");
-		// configuro i colori inerenti ai comandi, parametri e fasi.
-		TerminalColors.PARAMETER_COLOR = parameterColorConfig.color;
-		TerminalColors.COMMAND_COLOR = commandColorConfig.color;
-		TerminalColors.PHASE_COLOR = phaseColorConfig.color;
-		// controllo se i colori sono diversi da un valore null
+		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei colori del terminale 
+		if (parameterColorConfig!=null) TerminalColors.PARAMETER_COLOR = parameterColorConfig.color;
+		if(commandColorConfig!=null)TerminalColors.COMMAND_COLOR = commandColorConfig.color;
+		if (phaseColorConfig!=null)TerminalColors.PHASE_COLOR = phaseColorConfig.color;
+		// nodes colors
+		ColorConfig nodeNameColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("nodeName");
+		ColorConfig tagColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("tag");
+		ColorConfig attributeValueColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("attribute_value");
+		ColorConfig commentColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("parameter");
+		ColorConfig nodeValueColorConfig =  (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("nodeValue");
+		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei colori dei nodi 
+		if (nodeNameColorConfig!=null)DomColors.NODENAME_COLOR = nodeNameColorConfig.color;
+		if (tagColorConfig!=null)DomColors.TAG_COLOR = tagColorConfig.color;
+		if (commentColorConfig!=null)DomColors.COMMENT_COLOR =commentColorConfig.color;
+		if (attributeValueColorConfig!=null)DomColors.ATTRIBUTE_VALUE_COLOR = attributeValueColorConfig.color;
+		if (nodeValueColorConfig!=null)DomColors.NODEVALUE_COLOR = nodeValueColorConfig.color;
 		/*
- 				TERMINAL.NAME
+		 
+		 		TERMINAL.NAME
+		 
 		 */
-		TERMINAL_NAME = instance.configuration.terminalName;
-		instance.setName(TERMINAL_NAME);
-		/*
-		 * §
-		 */
+		// non teniamo conto per il momento di questa configurazione
+		// quindi configuriamo con il valore di default
+		instance.setName(DEFAULT_TERMINAL_NAME);
+	}
+
+	private static void initTerminal() {
+		config(); // configuration
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
-		LocalCommand.setInputHelpExploitable(true);
+		ColorLocalCommand.setInputHelpExploitable(true);
 		// imposto JjDom in modo tale che si adatti a un documento HTML colorato a
 		// livello di sintassi:
 		JjDom.documentTypeUsed = HTMLColorDocument.class;
-		// imposto i colori dei nodi
-		DomColors.tag_color = Color.WHITE;
-		DomColors.nodeName_color = Color.CYAN;
-		DomColors.comment_color = Color.GREEN;
-		DomColors.attribute_value_color = Color.YELLOW;
 		final ColorLocalCommand createCommand;
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand, setCommand, getCommand, markup;
@@ -157,7 +166,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		nodeNameParam = createCommand.addParam("nodeName", "Specify the node name");
 		nodeValueParam = createCommand.addParam("nodeValue", "Specify the node value");
 		appendParam = createCommand.addParam("append", "appends to current node");
-		documentTypeParam = createCommand.addParam("type",
+		documentTypeParam = createCommand.addParam("format",
 				"Specify the document type - " + j£.colors("(", Color.GREEN) + j£
 						.colors("html" + j£.colors("|", Color.DEFAULT) + j£.colors("xml", Color.MAGENTA), Color.MAGENTA)
 						+ j£.colors(")", Color.GREEN));
@@ -457,6 +466,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		});
 		// terzo comando : ls
 		lsCommand = new ColorLocalCommand("ls", "lists all the children of the current node");
+		// params -ls:
 		lsCommand.setExecution(new Execution() {
 			@Override
 			public Object exec() {
@@ -478,7 +488,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			@Override
 			public Object exec() {
 				if (instance.currentNode != null) {
-					return instance.currentNode.getMarkup();
+					String markup=instance.currentNode.getMarkup();
+					return "===================================================================================\n"+markup+"===================================================================================";
 				} else {
 					// da definire ...
 					return null;
@@ -488,7 +499,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// inserisco i comandi nel terminale, quelli generali
 		instance.addCommands(createCommand, cdCommand, lsCommand, markup);
 	}
-
 	private static void describeNodes(NodeList listNodes) {
 		for (int i = 0; i < listNodes.getLength(); i++) {
 			System.out.println((i + 1) + ") - NodeName:" + j£.colors(listNodes.item(i).getNodeName(), Color.CYAN)
@@ -496,7 +506,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					+ " - Children:" + listNodes.item(i).getChildNodes().getLength());
 		}
 	}
-
 	// ridefinisco il metodo getCommandRequest
 
 	@Override
@@ -513,7 +522,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		}
 		if (currentNode != null) {
 			myCommandRequest.append(
-					"-<" + j£.colors(currentNode.getNodeName().toUpperCase(), TerminalColors.PHASE_COLOR) + ">_:");
+					"_<" + j£.colors(currentNode.getNodeName().toUpperCase(), TerminalColors.PHASE_COLOR) + ">_ "+j£.colors("~/"+currentNode.getPath(),Color.YELLOW)+j£.colors(":",Color.WHITE));
 		} else {
 			myCommandRequest.append("-<" + j£.colors("NULL", Color.DEFAULT) + ">_:");
 		}

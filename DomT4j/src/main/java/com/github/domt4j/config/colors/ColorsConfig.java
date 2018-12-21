@@ -1,4 +1,4 @@
-package com.github.domt4j.config;
+package com.github.domt4j.config.colors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,10 +8,13 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import com.github.domt4j.config.Config;
+
 @XmlRootElement(name="colors.config")
 public class ColorsConfig implements Config,Colors{
 
 	@XmlElement(name="color.config")
+	public
 	List<ColorConfig> colorConfig;
 
 	public ColorsConfig() {

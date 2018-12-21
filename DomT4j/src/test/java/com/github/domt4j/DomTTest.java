@@ -1,14 +1,19 @@
 package com.github.domt4j;
 
+import java.awt.GraphicsEnvironment;
+import java.io.Console;
+import java.io.IOException;
+import java.net.URISyntaxException;
+
 public class DomTTest {
-public static void main(String[] args) {
-	// dobbiamo risolvere quando chiamiamo l'help generale
-	// due cose :
-	// 0: okok ora dobbiamo creare elementi dom colorati
-	// 1: i primi comandi non sono descritti bene e anche la cornicetta
-	// 2: lascia troppe andate a capo prima della richiesta dell'atro comando
-	
-	DomT4j t = DomT4j.getDomTerminal();
-	t.open();
-}
+	 public static void main (String [] args) throws IOException, InterruptedException, URISyntaxException{
+	        Console console = System.console();
+	        if(console == null && !GraphicsEnvironment.isHeadless()){
+	            String filename = DomT4jTest.class.getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+	            Runtime.getRuntime().exec(new String[]{"cmd","/c","start","cmd","/k","java -jar \"" + filename + "\""});
+	        }else{
+	            DomT4jTest.main(new String[0]);
+	            System.out.println("Program has ended, please type 'exit' to close the console");
+	        }
+	    }
 }

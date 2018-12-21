@@ -1,9 +1,11 @@
-package com.github.domt4j.config;
+package com.github.domt4j.config.colors;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.fusesource.jansi.Ansi.Color;
+
+import com.github.domt4j.config.Config;
 @XmlRootElement(name="color.config")
 public class ColorConfig implements Config{
 
