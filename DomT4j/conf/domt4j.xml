@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<DomT4j.config>
+    <colors.config>
+        <color.config>
+            <color>YELLOW</color>
+            <target>parameter</target>
+        </color.config>
+        <color.config>
+            <color>CYAN</color>
+            <target>command</target>
+        </color.config>
+        <color.config>
+            <color>MAGENTA</color>
+            <target>phase</target>
+        </color.config>
+        <color.config>
+            <color>DEFAULT</color>
+            <target>nodeName</target>
+        </color.config>
+        <color.config>
+            <color>YELLOW</color>
+            <target>attribute_value</target>
+        </color.config>
+        <color.config>
+            <color>DEFAULT</color>
+            <target>tag</target>
+        </color.config>
+        <color.config>
+            <color>BLUE</color>
+            <target>comment</target>
+        </color.config>
+        <color.config>
+            <color>DEFAULT</color>
+            <target>nodeValue</target>
+        </color.config>
+    </colors.config>
+    <terminal.name>DomT4j</terminal.name>
+</DomT4j.config>
