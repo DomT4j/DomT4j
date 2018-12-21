@@ -22,6 +22,7 @@ import cloud.jgo.jjdom.dom.nodes.Element;
 import cloud.jgo.jjdom.dom.nodes.Node;
 import cloud.jgo.jjdom.dom.nodes.NodeList;
 import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
+import cloud.jgo.jjdom.dom.nodes.html.color.Colorable;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.XMLDocument;
 import cloud.jgo.utils.command.Parameter;
@@ -207,16 +208,33 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				} else if (nodeType.equals("element")) {
 					if (instance.currentNode != null) {
 						// chiedo il nome dell'elemento
-						System.out.print("Element Name:");
-						String elementName = £._I();
-						Element element = instance.currentNode.getDocument().createElement(elementName);
-						if (element != null) {
-							// appendo automaticamente
-							instance.currentNode.appendChild(element);
-							return positiveMsg("Element added to the "
-									+ j£.colors(instance.currentNode.getNodeName(), Color.CYAN) + " node");
-						} else {
-							return error("Element creation failed");
+						if (instance.currentNode!=null) {
+							System.out.print("Element Name:");
+							String elementName = £._I();
+							if (instance.currentNode.getDocument() instanceof HTMLDocument) {
+								// html 
+								Element element = ((HTMLColorDocument)instance.currentNode.getDocument()).createColorElement(elementName);
+								if (element != null) {
+									// appendo automaticamente
+									instance.currentNode.appendChild(element);
+									return positiveMsg("Element added to the "
+											+ j£.colors(instance.currentNode.getNodeName(), Color.CYAN) + " node");
+								} else {
+									return error("Element creation failed");
+								}
+							}
+							else {
+								// xml
+								Element element = instance.currentNode.getDocument().createElement(elementName);
+								if (element != null) {
+									// appendo automaticamente
+									instance.currentNode.appendChild(element);
+									return positiveMsg("Element added to the "
+											+ j£.colors(instance.currentNode.getNodeName(), Color.CYAN) + " node");
+								} else {
+									return error("Element creation failed");
+								}
+							}
 						}
 					} else {
 						// da definire ...
@@ -369,7 +387,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		});
 		// esecuzioni dei parametri:nodeName
 		nodeNameParam.setExecution(new Execution() {
-
 			@Override
 			public Object exec() {
 				// okok qui ricavo la configurazione se c'è
@@ -386,8 +403,22 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 								if (config.isCompleted()) {
 
 									// quindi procediamo con la creazione dell'elemento
-									Element element = instance.currentNode.getDocument()
-											.createElement(config.getNodeName());
+									Element element = null ;
+									
+									if (instance.currentNode!=null) {
+										if (instance.currentNode.getDocument() instanceof HTMLDocument) {
+											// html file
+											element = ((HTMLColorDocument)instance.currentNode.getDocument())
+											.createColorElement(config.getNodeName());
+										}
+										else {
+											// xml file : provvisorio ...
+											element = instance.currentNode.getDocument().createElement(config.getNodeName());
+										}
+									}
+									else {
+										// da definire ...
+									}
 
 									// condivido l'oggetto
 
@@ -505,6 +536,83 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		});
 		// 4 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
+		// params :
+		final Parameter nodeValue;
+		final Parameter attribute;
+		nodeValue = setCommand.addParam("nodeValue","Node value");
+		attribute = setCommand.addParam("attribute","attribute");
+		nodeValue.setInputValueExploitable(true);
+		attribute.setInputValueExploitable(true);
+		attribute.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				
+				if (instance.currentNode!=null) {
+					if (attribute.getInputValue()!=null) {
+						// otteniamo valore e prop 
+						String value, attrib ;
+						
+						String input = attribute.getInputValue();
+						if (input.split(" ").length==2) {
+							
+							attrib = input.split(" ")[0];
+							value = input.split(" ")[1];
+							
+							// imposto l'attributo 
+							
+							if (instance.currentNode instanceof Element) {
+								((Element)instance.currentNode).setAttribute(attrib, value);
+								return setOk(attrib);
+							}
+							else {
+								// da definire ...
+							}
+						}
+						else {
+							// da definire ,..
+						}
+					}
+					else {
+						// da definire ,..
+					}
+					
+					
+					
+				}
+				else {
+					// da definire ...
+				}
+				
+				return null ;
+			}
+		});
+		nodeValue.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				if (instance.currentNode!=null) {
+					
+					
+					if (nodeValue.getInputValue()!=null) {
+						
+						
+						instance.currentNode.setNodeValue(nodeValue.getInputValue());
+						
+						return setOk("Node value");
+						
+					}
+					else {
+						// da definire ...
+					}
+				}
+				else {
+					// da definire ...
+				}
+				
+				return null ;
+			}
+		});
 		// 5 comando:markup: ottiene il markup del nodo corrente
 		markup = new ColorLocalCommand("markup", "Gets the markup of the current node");
 		markup.setExecution(new Execution() {
@@ -512,7 +620,13 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			@Override
 			public Object exec() {
 				if (instance.currentNode != null) {
-					String markup=instance.currentNode.getMarkup();
+					String markup=null ;
+					if (instance.currentNode instanceof Colorable) {
+						markup = ((Colorable)instance.currentNode).getColorMarkup();
+					}
+					else {
+						markup = instance.currentNode.getMarkup();
+					}
 					return "===================================================================================\n"+markup+"===================================================================================";
 				} else {
 					// da definire ...
@@ -545,7 +659,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(createCommand, cdCommand, lsCommand, markup, preview);
+		instance.addCommands(createCommand, cdCommand, lsCommand, markup, preview, setCommand);
 	}
 	private static void describeNodes(NodeList listNodes) {
 		System.out.println("___________________________________________________________________________________\n");
