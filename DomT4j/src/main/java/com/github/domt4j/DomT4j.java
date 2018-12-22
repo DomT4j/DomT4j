@@ -140,8 +140,10 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		instance.setName(DEFAULT_TERMINAL_NAME);
 	}
 
+	@SuppressWarnings("static-access")
 	private static void initTerminal() {
 		config(); // configuration
+		j£.ANSI_CONSOLE.systemInstall();
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
 		ColorLocalCommand.setInputHelpExploitable(true);
