@@ -4,8 +4,8 @@ public class DomT4jTest {
 	
 public static void main(String[] args) {
 	
-	// E' importante che ogni documento colorato abbia solo elementi colorati
-	// per una questione di logica e chiarezza
+	// 1 cosa da risolvere : il comando ex non ha un help
+	
 	
 	DomT4j term = DomT4j.getDomTerminal();
 	

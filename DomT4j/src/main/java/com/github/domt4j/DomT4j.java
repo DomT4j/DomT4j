@@ -25,9 +25,12 @@ import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
 import cloud.jgo.jjdom.dom.nodes.html.color.Colorable;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.XMLDocument;
+import cloud.jgo.utils.command.Command;
 import cloud.jgo.utils.command.Parameter;
+import cloud.jgo.utils.command.Sharer;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 import cloud.jgo.utils.command.execution.Execution;
+import cloud.jgo.utils.command.execution.SharedExecution;
 import cloud.jgo.utils.command.terminal.TerminalColors;
 import cloud.jgo.utils.command.terminal.phase.ColorLocalPhaseTerminal;
 import cloud.jgo.utils.command.terminal.phase.DefaultPhase;
@@ -144,6 +147,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	private static void initTerminal() {
 		config(); // configuration
 		j£.ANSI_CONSOLE.systemInstall();
+		instance.setExitCommand("ex");
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
 		ColorLocalCommand.setInputHelpExploitable(true);
@@ -152,9 +156,13 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		JjDom.documentTypeUsed = HTMLColorDocument.class;
 		final ColorLocalCommand createCommand;
 		final ColorLocalCommand cdCommand;
-		ColorLocalCommand lsCommand, setCommand, getCommand, markup, preview;
+		ColorLocalCommand lsCommand;
+		final ColorLocalCommand setCommand;
+		ColorLocalCommand getCommand, markup, preview, exit;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("create", "This command creates a node");
+		// 2 comando:set:imposta valori del nodo
+		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
 		// params :
 		final Parameter nodeTypeParam;
 		final Parameter documentTypeParam;
@@ -365,24 +373,54 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// esecuzioni dei parametri:nodeValue
-		nodeValueParam.setExecution(new Execution() {
-			
+		nodeValueParam.setExecution(new SharedExecution() {
 			@Override
-			public Object exec() {
+			protected Object sharedExec(Sharer sharer) {
 				
-				// controllo in tanto che ci sia un oggetto condiviso
-				if (nodeValueParam.getInputValue()!=null) {
-					if (createCommand.getSharedObject()!=null) {
-						if (createCommand.getSharedObject()instanceof NodeConfiguration) {
-							// da verificare ...
+				if (sharer.getSharerType()== cloud.jgo.utils.command.Sharer.Type.PARAMETER) {
+					
+					Parameter source = (Parameter) sharer ;
+					
+					Command parent = source.getParent();
+					
+					// qui sappiamo che è un parametro che richiede valore da input
+					// per cui verifico 
+					
+					if (source.getInputValue()!=null) {
+						if (parent.getCommand().equals(createCommand.getCommand())) {
+							
+							// parent : create
+							
+								if (createCommand.getSharedObject()!=null) {
+									if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+										// da verificare ...
+									}
+									else if(createCommand.getSharedObject()instanceof Element) {
+										// bene abbiamo un nodo:quindi è stata chiamata l'esecuzione del comando del nodeName
+										Element element = createCommand.getSharedObject();
+										element.setTextContent(source.getInputValue());
+										return setOk("Node value");
+									}
+								}
 						}
-						else if(createCommand.getSharedObject()instanceof Element) {
-							// bene abbiamo un nodo:quindi è stata chiamata l'esecuzione del comando del nodeName
-							Element element = createCommand.getSharedObject();
-							element.setTextContent(nodeValueParam.getInputValue());
-							return setOk("Node value");
-						}
+						else if(parent.getCommand().equals(setCommand.getCommand())) {
+							if (instance.currentNode!=null) {
+								
+								
+								if (source.getInputValue()!=null) {
+									
+									
+									instance.currentNode.setNodeValue(source.getInputValue());
+									
+									return setOk("Node value");
+									
+								}
+								else {
+									// da definire ...
+								}
+							}}
 					}
+					
 				}
 				return null ;
 			}
@@ -536,14 +574,16 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return null;
 			}
 		});
-		// 4 comando:set:imposta valori del nodo
-		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
-		// params :
-		final Parameter nodeValue;
+		
+		
+		// set params :
+		
+		// come prima cosa condivido il parametro nodeValue da create
+		
+		setCommand.shareItEntirely(nodeValueParam);
+		
 		final Parameter attribute;
-		nodeValue = setCommand.addParam("nodeValue","Node value");
-		attribute = setCommand.addParam("attribute","attribute");
-		nodeValue.setInputValueExploitable(true);
+		attribute = setCommand.addParam("attribute","Specify the attribute");
 		attribute.setInputValueExploitable(true);
 		attribute.setExecution(new Execution() {
 			
@@ -581,32 +621,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					
 					
 					
-				}
-				else {
-					// da definire ...
-				}
-				
-				return null ;
-			}
-		});
-		nodeValue.setExecution(new Execution() {
-			
-			@Override
-			public Object exec() {
-				if (instance.currentNode!=null) {
-					
-					
-					if (nodeValue.getInputValue()!=null) {
-						
-						
-						instance.currentNode.setNodeValue(nodeValue.getInputValue());
-						
-						return setOk("Node value");
-						
-					}
-					else {
-						// da definire ...
-					}
 				}
 				else {
 					// da definire ...
@@ -660,8 +674,26 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return null ;
 			}
 		});
+		// command : exit
+		exit = new ColorLocalCommand("exit","closes the program");
+		exit.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				
+				// disistallo jansi
+				
+				j£.ANSI_CONSOLE.systemUninstall();
+				
+				System.out.println("Good bye !!");
+				
+				System.exit(0);
+				
+				return null ;
+			}
+		});
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(createCommand, cdCommand, lsCommand, markup, preview, setCommand);
+		instance.addCommands(createCommand, cdCommand, lsCommand, markup, preview, setCommand, exit);
 	}
 	private static void describeNodes(NodeList listNodes) {
 		System.out.println("___________________________________________________________________________________\n");
