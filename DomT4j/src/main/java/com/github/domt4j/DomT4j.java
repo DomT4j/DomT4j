@@ -25,6 +25,7 @@ import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
 import cloud.jgo.jjdom.dom.nodes.html.color.Colorable;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.XMLDocument;
+import cloud.jgo.jjdom.dom.nodes.xml.color.XMLColorDocument;
 import cloud.jgo.utils.command.Command;
 import cloud.jgo.utils.command.Parameter;
 import cloud.jgo.utils.command.Sharer;
@@ -125,7 +126,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		ColorConfig nodeNameColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("nodeName");
 		ColorConfig tagColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("tag");
 		ColorConfig attributeValueColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("attribute_value");
-		ColorConfig commentColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("parameter");
+		ColorConfig commentColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("comment");
 		ColorConfig nodeValueColorConfig =  (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("nodeValue");
 		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei colori dei nodi 
 		if (nodeNameColorConfig!=null)DomColors.NODENAME_COLOR = nodeNameColorConfig.color;
@@ -210,7 +211,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 						// chiedo il nome dell'elemento root
 						System.out.print("Root element name:");
 						String rootElementName = £._I();
-						instance.currentNode = new XMLDocument(rootElementName);
+						instance.currentNode = new XMLColorDocument(Document.CHARSET_UTF_8,null, rootElementName);
 						return positiveMsg("Document " + j£.colors("XML", Color.CYAN) + " is created");
 					} else {
 						return error("Document type is not valid - Available types= xml|html");
