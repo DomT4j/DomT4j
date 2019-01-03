@@ -24,7 +24,6 @@ import cloud.jgo.jjdom.dom.nodes.NodeList;
 import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
 import cloud.jgo.jjdom.dom.nodes.html.color.Colorable;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
-import cloud.jgo.jjdom.dom.nodes.xml.XMLDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.color.XMLColorDocument;
 import cloud.jgo.utils.command.Command;
 import cloud.jgo.utils.command.Parameter;
@@ -236,7 +235,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 							}
 							else {
 								// xml
-								Element element = instance.currentNode.getDocument().createElement(elementName);
+								Element element = ((XMLColorDocument)instance.currentNode.getDocument()).createElement(elementName);
 								if (element != null) {
 									// appendo automaticamente
 									instance.currentNode.appendChild(element);
@@ -317,7 +316,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 											document = JjDom.document;
 										} else {
 											// deve essere per forza un documento xml
-											document = new XMLDocument();
+											// qui mi serve un documento XML vuoto 
 										}
 										// condivido il documento questa volta
 										// cosi potrà essere appeso all'occorrenza

@@ -18,6 +18,7 @@ public class DefaultDomT4jConfig extends DomT4jConfig{
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.MAGENTA,"phase"));
 		// nodes :
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.DEFAULT,"nodeName"));
+		colorsConfiguration.colorConfig.add(new ColorConfig(Color.CYAN,"attribute"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.YELLOW,"attribute_value"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.DEFAULT,"tag"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.BLUE,"comment"));
