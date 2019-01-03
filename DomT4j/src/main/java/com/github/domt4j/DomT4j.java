@@ -2,7 +2,13 @@ package com.github.domt4j;
 
 import static org.fusesource.jansi.Ansi.ansi;
 
+import java.awt.Desktop;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 import org.fusesource.jansi.Ansi.Color;
@@ -25,7 +31,9 @@ import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
 import cloud.jgo.jjdom.dom.nodes.html.color.Colorable;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.color.XMLColorDocument;
+import cloud.jgo.utils.ColorString;
 import cloud.jgo.utils.command.Command;
+import cloud.jgo.utils.command.LocalCommand;
 import cloud.jgo.utils.command.Parameter;
 import cloud.jgo.utils.command.Sharer;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
@@ -35,6 +43,8 @@ import cloud.jgo.utils.command.terminal.TerminalColors;
 import cloud.jgo.utils.command.terminal.phase.ColorLocalPhaseTerminal;
 import cloud.jgo.utils.command.terminal.phase.DefaultPhase;
 import cloud.jgo.utils.command.terminal.phase.LocalPhaseTerminal;
+import cloud.jgo.utils.command.terminal.phase.Phase;
+import cloud.jgo.utils.command.terminal.phase.Rule;
 
 public class DomT4j extends ColorLocalPhaseTerminal {
 
@@ -146,7 +156,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	@SuppressWarnings("static-access")
 	private static void initTerminal() {
 		config(); // configuration
-		j£.ANSI_CONSOLE.systemInstall();
 		instance.setExitCommand("ex");
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
@@ -158,7 +167,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markup, preview, exit;
+		ColorLocalCommand getCommand, markup, preview, exit, helps, config;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("create", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
@@ -315,8 +324,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 											JjDom.newDocument().setMinimalTags().useDoctype(true).home().jqueryInit();
 											document = JjDom.document;
 										} else {
-											// deve essere per forza un documento xml
-											// qui mi serve un documento XML vuoto 
+											document = new XMLColorDocument();
 										}
 										// condivido il documento questa volta
 										// cosi potrà essere appeso all'occorrenza
@@ -665,6 +673,29 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					}
 					else {
 						// da definire ...
+						if (Desktop.isDesktopSupported()) {
+							
+							// salvo il file 
+							java.io.File xmlFile = new java.io.File("preview.xml");
+							j£.writeFile(xmlFile,false,new String[] {instance.currentNode.getDocument().getMarkup()});
+							// apro il file 
+							
+							try {
+								Desktop.getDesktop().browse(xmlFile.toURI());
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							xmlFile.delete();
+							xmlFile.deleteOnExit();
+						}
 					}
 					
 				}
@@ -692,8 +723,174 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return null ;
 			}
 		});
+		// command : helps
+		helps = new ColorLocalCommand("helps","Shows the commands list");
+		helps.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				ColorString string = new ColorString();
+				string.append("------------------------------------------------------------------------\n");
+				string.append("Commands List :\n");
+				string.append("------------------------------------------------------------------------\n");
+				Collection<LocalCommand> collection = instance.commands.values();
+				List<LocalCommand>commands = new ArrayList<LocalCommand>();
+				Iterator<LocalCommand>iterator = collection.iterator();
+				while (iterator.hasNext()) {
+					LocalCommand localCommand = (LocalCommand) iterator.next();
+					commands.add(localCommand);
+				}
+				Collections.sort(commands);
+				for (int i = 0; i < commands.size(); i++) {
+					if (i < commands.size()-1) {
+						if (commands.get(i).getBelongsTo()!=null) {
+							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append(commands.get(i).getBelongsTo().phaseName(),TerminalColors.PHASE_COLOR).append("\n");
+						}
+						else {
+							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append("null",Color.DEFAULT).append("\n");
+						}
+					}
+					else {
+						if (commands.get(i).getBelongsTo()!=null) {
+							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append(commands.get(i).getBelongsTo().phaseName(),TerminalColors.PHASE_COLOR);
+						}
+						else {
+							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append("null",Color.DEFAULT);
+						}
+					}
+				}
+				return string.toString();
+			}
+		});
+		// command : config
+		config = new ColorLocalCommand("config","DomT4j configuration");
+		Parameter show = config.addParam("show","This parameter shows the configuration");
+		show.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				try {
+					return j£.readFile(CONF_FILE).trim();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				return null ;
+			}
+		});
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(createCommand, cdCommand, lsCommand, markup, preview, setCommand, exit);
+		instance.addCommands(cdCommand, lsCommand, markup, preview, setCommand, exit, helps, config);
+	
+		//////////////////////////////////////////////////////////////////////////
+		//  PHASES DEV :
+		//////////////////////////////////////////////////////////////////////////
+		
+		
+		Phase creationPhase,migrationPhase;
+		
+		
+		// 1 PHASE : CREATE 
+		
+		creationPhase = instance.createPhase(1, "creation","In questa fase si crea e imposta un nodo dom",createCommand);
+		
+		// 2 PHASE : MIGRATION 
+		
+		// commands :
+		final ColorLocalCommand connect ;
+		
+		connect = new ColorLocalCommand("connect","Connection to ftp server");
+		
+		final Parameter host ;
+		final Parameter user;
+		final Parameter passw;
+		
+		host = connect.addParam("host","ftp host");
+		user = connect.addParam("user","ftp username");
+		passw = connect.addParam("password","ftp password");
+		
+		host.setInputValueExploitable(true);
+		user.setInputValueExploitable(true);
+		passw.setInputValueExploitable(true);
+		
+		host.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				// verifico che ci sia il valore da input 
+				
+				if (host.getInputValue()!=null) {
+					
+					
+					// okok mi preparo
+					
+					// l'oggetto configurazione apposito 
+					
+					FTPServerConfiguration c = new FTPServerConfiguration();
+					
+					c.setHost(host.getInputValue());
+					
+					// condivido l'oggetto
+					
+					connect.shareObject(c);
+					
+					return setOk("Ftp-Host");
+				}
+				
+				return null ;
+			}
+		});
+		
+		user.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				if (connect.getSharedObject()!=null) {
+					
+					if (user.getInputValue()!=null) {
+						// ottengo la configurazione 
+						
+						FTPServerConfiguration conf = connect.getSharedObject();
+						
+						conf.setUsername(user.getInputValue());
+						
+						return setOk("Ftp-User");
+					}
+				}
+				else {
+					// da definire ...
+				}
+				return null ;
+			}
+		});
+		
+		
+		passw.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				if (connect.getSharedObject()!=null) {
+					
+					if (passw.getInputValue()!=null) {
+						// ottengo la configurazione 
+						
+						FTPServerConfiguration conf = connect.getSharedObject();
+						
+						conf.setPassword(passw.getInputValue());
+						
+						return setOk("Ftp-Passw");
+					}
+				}
+				else {
+					// da definire ...
+				}
+				return null ;
+			}
+		});
+		
+		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete",connect);
+		
+		// okok verificare qual'è il problema ....
+		
 	}
 	private static void describeNodes(NodeList listNodes) {
 		System.out.println("___________________________________________________________________________________\n");
@@ -714,15 +911,15 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// controllo se abbiamo una fase corrente
 
 		if (currentPhase != null) {
-
-			myCommandRequest.append("_(" + j£.colors(currentPhase.phaseName(), TerminalColors.PHASE_COLOR) + ")_");
-
+			if (instance.configuration.phaseVisible) {
+				myCommandRequest.append("_(" + j£.colors(currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR) + ")_");	
+			}
 		}
 		if (currentNode != null) {
 			myCommandRequest.append(
-					"_<" + j£.colors(currentNode.getNodeName().toUpperCase(), TerminalColors.PHASE_COLOR) + ">_ "+j£.colors("~/"+currentNode.getPath(),Color.YELLOW)+j£.colors(":",Color.WHITE));
+					"_<" + j£.colors(currentNode.getNodeName().toUpperCase(), Color.MAGENTA) + ">_ "+j£.colors("~/"+currentNode.getPath(),Color.YELLOW)+j£.colors(":",Color.WHITE));
 		} else {
-			myCommandRequest.append("-<" + j£.colors("NULL", Color.DEFAULT) + ">_:");
+			myCommandRequest.append("_<" + j£.colors("NULL", Color.DEFAULT) + ">_:");
 		}
 
 		return myCommandRequest.toString();

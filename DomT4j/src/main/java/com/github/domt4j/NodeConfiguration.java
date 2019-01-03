@@ -1,8 +1,8 @@
 package com.github.domt4j;
 
+import com.github.domt4j.config.Config;
 
-
-public class NodeConfiguration{
+public class NodeConfiguration implements Config{
 	
 	// questa classe serve per creare
 	// giusto le variabili necessarie minimali
@@ -109,6 +109,11 @@ public class NodeConfiguration{
 			}
 		}
 		return configurated ;
+	}
+
+	public String getTarget() {
+		// TODO Auto-generated method stub
+		return "node";
 	}
 
 }

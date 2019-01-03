@@ -15,7 +15,7 @@ public class DefaultDomT4jConfig extends DomT4jConfig{
 		// parameters and commands :
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.YELLOW,"parameter"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.CYAN,"command"));
-		colorsConfiguration.colorConfig.add(new ColorConfig(Color.MAGENTA,"phase"));
+		colorsConfiguration.colorConfig.add(new ColorConfig(Color.GREEN,"phase"));
 		// nodes :
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.DEFAULT,"nodeName"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.CYAN,"attribute"));
@@ -23,6 +23,8 @@ public class DefaultDomT4jConfig extends DomT4jConfig{
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.DEFAULT,"tag"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.BLUE,"comment"));
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.DEFAULT,"nodeValue"));
+		// phase.visible
+		phaseVisible = true ;
 	}
 		
 }

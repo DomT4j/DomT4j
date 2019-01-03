@@ -10,12 +10,16 @@
             <target>command</target>
         </color.config>
         <color.config>
-            <color>MAGENTA</color>
+            <color>GREEN</color>
             <target>phase</target>
         </color.config>
         <color.config>
             <color>DEFAULT</color>
             <target>nodeName</target>
+        </color.config>
+        <color.config>
+            <color>CYAN</color>
+            <target>attribute</target>
         </color.config>
         <color.config>
             <color>YELLOW</color>
