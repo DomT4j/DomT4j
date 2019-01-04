@@ -471,9 +471,58 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 							// essere + nodi specificati
 							else if(c.getNodeType().equals("element")) {
 								
+								// per prima cosa controllo se abbiamo un nodo corrente
+								// dentro cui appendere 
+								
+								if (instance.currentNode!=null) {
+									// controllo il nodeName per prima cosa
+									
+									if (c.getNodeName()!=null) {
+										// controllo se sono multipli
+										List<Element>elements = new ArrayList<Element>(); ;
+										if (c.getNodeName().contains(",")) {
+											String[]split = c.getNodeName().split(",");
+											for (int i = 0; i < split.length; i++) {
+												split[i] = split[i].trim();
+												Element element = instance.currentNode.getDocument().createElement(split[i]);
+												elements.add(element);
+											}
+										}
+										else elements.add(instance.currentNode.getDocument().createElement(c.getNodeName()));
+										// okok si procede : si controlla il nodeValue
+										if (c.getNodeValue()!=null) {
+											if (c.getNodeValue().contains(",")) {
+												String[]split = c.getNodeValue().split(",");
+												for (int i = 0; i < split.length; i++) {
+													split[i] = split[i].trim();
+													for (int j = 0; j < elements.size(); j++) {
+														elements.get(j).setNodeValue(split[i]);
+													}
+												}
+											}
+											else {
+												// qui setto solo il primo degli elementi pescati nella lista
+												elements.get(0).setNodeValue(c.getNodeValue());
+											}
+										}
+										// okok possiamo appendere gli elementi 
+
+										for (Element element:elements) {
+											instance.currentNode.appendChild(element);
+											System.out.println(positiveMsg("The \""+j£.colors(element.getNodeName(),DomColors.NODENAME_COLOR)+"\" node has been added to the \""+j£.colors(instance.currentNode.getNodeName(),DomColors.NODENAME_COLOR)+"\" node"));
+										}
+										return null ;
+									}
+									else {
+										return error("Node name is not set");
+									}
+								}
+								else {
+									return error("There is no current node");
+								}
 							}
 							else if(c.getNodeType().equals("comment")) {
-
+								// definire qui ...
 							}
 							else {
 								return error("Node type is not valid");
