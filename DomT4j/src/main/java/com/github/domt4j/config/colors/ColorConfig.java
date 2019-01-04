@@ -29,5 +29,10 @@ public class ColorConfig implements Config{
 		// TODO Auto-generated method stub
 		return this.target ;
 	}
+
+	public boolean isCompleted() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 	
 }

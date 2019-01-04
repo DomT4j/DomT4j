@@ -115,5 +115,21 @@ public class NodeConfiguration implements Config{
 		// TODO Auto-generated method stub
 		return "node";
 	}
+	
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		String result = null ;
+		try {
+			result =  DomT4j.toString(this);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result ;
+	}
 
 }

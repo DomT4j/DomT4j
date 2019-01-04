@@ -52,14 +52,30 @@ public class FTPServerConfiguration implements Config{
 
 	@Override
 	public String toString() {
-		ColorString buffer = new ColorString();
-		buffer.append("------------------------------------------------------------------------\n");
-		buffer.append("FTP-Server-configuration\n");
-		buffer.append("------------------------------------------------------------------------\n");
-		buffer.append("° Ftp-Host",Color.YELLOW).append("=",Color.WHITE).append(this.host,Color.DEFAULT).append("  ")
-		      .append("° Ftp-User",Color.YELLOW).append("=",Color.WHITE).append(this.username,Color.DEFAULT).append("  ")
-		      .append("° Ftp-Passw",Color.YELLOW).append("=",Color.WHITE).append(this.password,Color.DEFAULT).append("\n");
-		return buffer.toString();
+//		ColorString buffer = new ColorString();
+//		buffer.append("------------------------------------------------------------------------\n");
+//		buffer.append("FTP-Server-configuration\n");
+//		buffer.append("------------------------------------------------------------------------\n");
+//		buffer.append("° Ftp-Host",Color.YELLOW).append("=",Color.WHITE).append(this.host,Color.DEFAULT).append("  ")
+//		      .append("° Ftp-User",Color.YELLOW).append("=",Color.WHITE).append(this.username,Color.DEFAULT).append("  ")
+//		      .append("° Ftp-Passw",Color.YELLOW).append("=",Color.WHITE).append(this.password,Color.DEFAULT).append("\n");
+//		return buffer.toString();
+		String result = null ;
+		try {
+			result =  DomT4j.toString(this);
+		} catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return result ;
+	}
+
+	public boolean isCompleted() {
+		if (this.host!=null&&this.username!=null&&this.password!=null)return true ;
+		else return false ;
 	}
 	
 	

@@ -35,5 +35,9 @@ public class ColorsConfig implements Config,Colors{
 		// TODO Auto-generated method stub
 		return "colors";
 	}
+	public boolean isCompleted() {
+		// TODO Auto-generated method stub
+		return true;
+	}
 
 }

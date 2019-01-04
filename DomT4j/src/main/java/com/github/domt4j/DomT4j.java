@@ -4,6 +4,7 @@ import static org.fusesource.jansi.Ansi.ansi;
 
 import java.awt.Desktop;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,6 +83,31 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 	static String positiveMsg(String msg) {
 		return ansi().fg(Color.WHITE).a(msg + " (" + ansi().fg(Color.CYAN).a("OK").reset() + ")").reset().toString();
+	}
+	
+	static String toString(Object obj) throws IllegalArgumentException, IllegalAccessException {
+		ColorString string = new ColorString();
+		string.append("------------------------------------------------------------------------\n");
+		string.append(""+obj.getClass().getSimpleName()+" - Configuration\n");
+		string.append("------------------------------------------------------------------------\n");
+		Class<?>clazz = obj.getClass();
+		Field[]fields = clazz.getDeclaredFields();
+		int count = 0 ;
+		for (Field field : fields) {
+			field.setAccessible(true);
+			String fieldName = field.getName();
+			Object fieldValue = field.get(obj);
+			if (count == 3) {
+				// si va a capo
+				count = 0 ;
+				string.append("\n\n");
+			}
+			else {
+				string.append("* "+fieldName,Color.YELLOW).append("=",Color.WHITE).append(fieldValue+"",Color.DEFAULT).append("  ");	
+			}
+			count++ ;
+		}
+		return string.toString()+"\n";
 	}
 
 	private DomT4j() {}
@@ -276,217 +302,76 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return null;
 			}
 		});
-		// esecuzioni dei parametri:nodeType
+		// parameter executions - create :
+		// - NODETYPE
 		nodeTypeParam.setExecution(new Execution() {
+			
 			@Override
 			public Object exec() {
-				String inputType = nodeTypeParam.getInputValue();
-				// in questo comando si crea il nodo, quindi la configurazione
-				NodeConfiguration config = new NodeConfiguration();
-				if (inputType != null) {
-					boolean result = config.setNodeType(inputType);
-					if (result == false) {
-						return error("Node type is not valid - Available types= document|element|comment");
-					} else {
-						// condivido l'oggetto
-						createCommand.shareObject(config);
-						return setOk(inputType);
-					}
-				}
-				return null;
-			}
-		});
-		// esecuzioni dei parametri:documentType
-		documentTypeParam.setExecution(new Execution() {
-			@SuppressWarnings("static-access")
-			@Override
-			public Object exec() {
-				// qui mi devo assicurare in tanto che ci sia una config condivisa
-				// e inoltre verificare che quest'ultima punti a un documento
-				if (createCommand.getSharedObject() != null) {
-					// mi assicuro che la config punti a un documento
-					if (createCommand.getSharedObject() instanceof NodeConfiguration) {
-						// qui diamo per scontato che la configurazione intercettata
-						// abbia un valore, poichè senza specificare il tipo di nodo
-						// non si può creare proprio il nodo.
-						if (((NodeConfiguration) createCommand.getSharedObject()).getNodeType().equals("document")) {
-							if (documentTypeParam.getInputValue() != null) {
-								boolean result = ((NodeConfiguration) createCommand.getSharedObject())
-										.setDocumentType(documentTypeParam.getInputValue());
-								if (result == false) {
-									return error("Document type is not valid - Available types= html|xml");
-								} else {
-									if (((NodeConfiguration) createCommand.getSharedObject()).isCompleted()) {
-										// sappiamo che la configurazione è completata
-										// quindi creo il documento e lo condivido
-										Document document = null;
-										if (documentTypeParam.getInputValue().equals("html")) {
-											JjDom.newDocument().setMinimalTags().useDoctype(true).home().jqueryInit();
-											document = JjDom.document;
-										} else {
-											document = new XMLColorDocument();
-										}
-										// condivido il documento questa volta
-										// cosi potrà essere appeso all'occorrenza
-										createCommand.shareObject(document);
-										return setOk("Document type");
-									}
-								}
-							}
-
-						} else {
-							// da definire ...
-						}
-					} else {
-						// da definire ...
-					}
-				} else {
-					// da definire ...
-				}
-				return null;
-			}
-		});
-		// esecuzioni dei parametri:append
-		appendParam.setExecution(new Execution() {
-
-			@Override
-			public Object exec() {
-				if (instance.currentNode != null) {
-					// ci assicuriamo che ci sia
-					// un oggetto condiviso
-					if (createCommand.getSharedObject() != null) {
-						if (createCommand.getSharedObject() instanceof Node) {
-							// appeso @
-							instance.currentNode.appendChild((Node) createCommand.getSharedObject());
-							createCommand.shareObject(null);
-							return positiveMsg("Element added to the "
-									+ j£.colors(instance.currentNode.getNodeName(), Color.CYAN) + " node");
-						} else {
-							// da definire ...
-							return error("Element creation failed");
-						}
-					} else {
-						// da definire ...
-					}
-				} else {
-					// qui non c'è il nodo corrente
-					// quindi siamo all'inizio e quindi potrebbe trattarsi di un documento
-					if (createCommand.getSharedObject() instanceof Document) {
-						// appeso @
-						instance.currentNode = createCommand.getSharedObject(); // si tratta di un documento
-						createCommand.shareObject(null);
-					}
-				}
-				return null;
-			}
-		});
-		// esecuzioni dei parametri:nodeValue
-		nodeValueParam.setExecution(new SharedExecution() {
-			@Override
-			protected Object sharedExec(Sharer sharer) {
+				// questo comando è la chiave per creare la configurazione 
 				
-				if (sharer.getSharerType()== cloud.jgo.utils.command.Sharer.Type.PARAMETER) {
+				if (nodeTypeParam.getInputValue()!=null) {
 					
-					Parameter source = (Parameter) sharer ;
+					NodeConfiguration conf = new NodeConfiguration();
 					
-					Command parent = source.getParent();
+					conf.setNodeType(nodeTypeParam.getInputValue());
 					
-					// qui sappiamo che è un parametro che richiede valore da input
-					// per cui verifico 
+					// condivido la conf
 					
-					if (source.getInputValue()!=null) {
-						if (parent.getCommand().equals(createCommand.getCommand())) {
-							
-							// parent : create
-							
-								if (createCommand.getSharedObject()!=null) {
-									if (createCommand.getSharedObject()instanceof NodeConfiguration) {
-										// da verificare ...
-									}
-									else if(createCommand.getSharedObject()instanceof Element) {
-										// bene abbiamo un nodo:quindi è stata chiamata l'esecuzione del comando del nodeName
-										Element element = createCommand.getSharedObject();
-										element.setTextContent(source.getInputValue());
-										return setOk("Node value");
-									}
-								}
-						}
-						else if(parent.getCommand().equals(setCommand.getCommand())) {
-							if (instance.currentNode!=null) {
-								
-								
-								if (source.getInputValue()!=null) {
-									
-									
-									instance.currentNode.setNodeValue(source.getInputValue());
-									
-									return setOk("Node value");
-									
-								}
-								else {
-									// da definire ...
-								}
-							}}
-					}
-					
+					createCommand.shareObject(conf);
+					return setOk("Node type");
 				}
 				return null ;
 			}
 		});
-		// esecuzioni dei parametri:nodeName
-		nodeNameParam.setExecution(new Execution() {
+		// - FORMAT
+		documentTypeParam.setExecution(new Execution() {
+			
 			@Override
 			public Object exec() {
-				// okok qui ricavo la configurazione se c'è
-				if (createCommand.getSharedObject() != null) {
-
-					if (createCommand.getSharedObject() instanceof NodeConfiguration) {
-
-						if (nodeNameParam.getInputValue() != null) {
-							// okok imposto il settaggio
-							NodeConfiguration config = createCommand.getSharedObject();
-							if (config.getNodeType().equals("element")) {
-								config.setNodeName(nodeNameParam.getInputValue());
-								// sappiamo che è completata la config
-								if (config.isCompleted()) {
-
-									// quindi procediamo con la creazione dell'elemento
-									Element element = null ;
-									
-									if (instance.currentNode!=null) {
-										if (instance.currentNode.getDocument() instanceof HTMLDocument) {
-											// html file
-											element = ((HTMLColorDocument)instance.currentNode.getDocument())
-											.createColorElement(config.getNodeName());
-										}
-										else {
-											// xml file : provvisorio ...
-											element = instance.currentNode.getDocument().createElement(config.getNodeName());
-										}
-									}
-									else {
-										// da definire ...
-									}
-
-									// condivido l'oggetto
-
-									createCommand.shareObject(element);
-
-									return setOk("Node name");
+				
+				// qui si scegli il tipo di documento
+				
+				// prima cosa verifico che la configurazione ci sia
+				
+				if (createCommand.getSharedObject()!=null) {
+					
+					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+						
+						// verifico che la configurazione rispecchi un documento
+						NodeConfiguration conf = createCommand.getSharedObject();
+						if (conf.getNodeType()!=null) {
+							if (conf.getNodeType().equals("document")) {
+								if (documentTypeParam.getInputValue()!=null) {
+									// qui finalmente procediamo impostando il formato del documento :)
+									conf.setDocumentType(documentTypeParam.getInputValue());
+									return setOk("Document format");
 								}
-							} else {
-								// da definire ...
+							}
+							else {
+								return error("The node is not a document");
 							}
 						}
-					} else {
-						// da definire ...
+						else {
+							// non abbiamo settato il tipo di nodo
+							return error("Node type is not set");
+						}
 					}
-				} else {
+					else {
+						// error #1 : l'oggetto condiviso non rispecchia quello previsto
+						return error("The shared object does not reflect the expected one");
+					}
+				}
+				else {
 					// da definire ...
 				}
+				
 				return null;
 			}
 		});
+		// - NODENAME
+		
+		
 		// 2 comando : cd
 		cdCommand = new ColorLocalCommand("cd", "this command allows to change node");
 		// ha un valore da input
@@ -796,9 +681,44 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// 2 PHASE : MIGRATION 
 		
 		// commands :
-		final ColorLocalCommand connect ;
+		final ColorLocalCommand connect,migrate ;
 		
 		connect = new ColorLocalCommand("connect","Connection to ftp server");
+		
+		migrate = new ColorLocalCommand("migrate","migrate the document");
+		
+		migrate.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				
+				// controllo che ci sia una configurazione pronta
+				if (connect.getSharedObject()!=null) {
+					
+					FTPServerConfiguration conf = connect.getSharedObject();
+					
+					// controllo che la configurazione sia pronta
+					if (conf.isCompleted()) {
+						
+						System.out.print("Destination URL:");
+						String urlResource = j£._I();
+						
+						System.out.println("Migration in progress ...");
+						// mi connetto al server
+						JjDom.connect(conf.getHost(), conf.getUsername(), conf.getPassword()).migrate(urlResource,instance.currentNode.getDocument());
+						
+					}
+					else {
+						error("The configuration is not complete");
+					}
+				}
+				else {
+					// da definire ...
+				}
+				
+				return null ;
+			}
+		});
 		
 		final Parameter host ;
 		final Parameter user;
@@ -887,7 +807,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		
-		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete",connect);
+		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete",connect,migrate);
 		
 		// okok verificare qual'è il problema ....
 		

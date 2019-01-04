@@ -30,4 +30,9 @@ public class DomT4jConfig implements Config {
 		return "global";
 	}
 
+	public boolean isCompleted() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
 }
