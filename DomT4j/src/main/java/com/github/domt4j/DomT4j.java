@@ -50,16 +50,16 @@ import cloud.jgo.utils.command.terminal.phase.Rule;
 public class DomT4j extends ColorLocalPhaseTerminal {
 
 	private static DomT4j instance = null;
-	public static final String DEFAULT_TERMINAL_NAME = j£.colors("DomT4j",Color.CYAN);
-	public final static File CONF_DIR= new File("conf");  
-	public final static File CONF_FILE = new File(CONF_DIR,"domt4j.xml");
+	public static final String DEFAULT_TERMINAL_NAME = j£.colors("DomT4j", Color.CYAN);
+	public final static File CONF_DIR = new File("conf");
+	public final static File CONF_FILE = new File(CONF_DIR, "domt4j.xml");
 
 	// campi della classe
 
 	private Node currentNode = null;
-	
+
 	private DomT4jConfig configuration = null;
-	
+
 	public DomT4jConfig getConfiguration() {
 		return this.configuration;
 	}
@@ -75,12 +75,12 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	static String error(String msg) {
 		return ansi().fg(Color.RED).a(msg + " #").reset().toString();
 	}
-	
+
 	static String setOk(String var) {
 		return ansi().fg(Color.WHITE).a("The " + var + " is set (" + ansi().fg(Color.CYAN).a("OK").reset() + ")")
 				.reset().toString();
 	}
-	
+
 	static String setOk2(String var) {
 		return ansi().fg(Color.WHITE).a("The " + var + " are set (" + ansi().fg(Color.CYAN).a("OK").reset() + ")")
 				.reset().toString();
@@ -89,95 +89,113 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	static String positiveMsg(String msg) {
 		return ansi().fg(Color.WHITE).a(msg + " (" + ansi().fg(Color.CYAN).a("OK").reset() + ")").reset().toString();
 	}
-	
+
 	static String toString(Object obj) throws IllegalArgumentException, IllegalAccessException {
 		ColorString string = new ColorString();
 		string.append("------------------------------------------------------------------------\n");
-		string.append(""+obj.getClass().getSimpleName()+" - Configuration\n");
+		string.append("" + obj.getClass().getSimpleName() + " - Configuration\n");
 		string.append("------------------------------------------------------------------------\n");
-		Class<?>clazz = obj.getClass();
-		Field[]fields = clazz.getDeclaredFields();
-		int count = 0 ;
+		Class<?> clazz = obj.getClass();
+		Field[] fields = clazz.getDeclaredFields();
+		int count = 0;
 		for (Field field : fields) {
 			field.setAccessible(true);
 			String fieldName = field.getName();
 			Object fieldValue = field.get(obj);
 			if (count == 3) {
 				// si va a capo
-				count = 0 ;
+				count = 0;
 				string.append("\n\n");
+			} else {
+				string.append("* " + fieldName, Color.YELLOW).append("=", Color.WHITE)
+						.append(fieldValue + "", Color.DEFAULT).append("  ");
 			}
-			else {
-				string.append("* "+fieldName,Color.YELLOW).append("=",Color.WHITE).append(fieldValue+"",Color.DEFAULT).append("  ");	
-			}
-			count++ ;
+			count++;
 		}
-		return string.toString()+"\n";
+		return string.toString() + "\n";
 	}
 
-	private DomT4j() {}
-	
+	private DomT4j() {
+	}
+
 	private static void config() {
 		/*
 		 * Config XML from HERE To §
 		 */
 		if (CONF_DIR.exists()) {
-			
+
 			// verifico se esiste il file di config
-			
+
 			if (CONF_FILE.exists()) {
-				instance.configuration = (DomT4jConfig) £.convertFromXMLToObject(CONF_FILE,DomT4jConfig.class);
+				instance.configuration = (DomT4jConfig) £.convertFromXMLToObject(CONF_FILE, DomT4jConfig.class);
 				System.out.println("Abbiamo correttamente aquisito il file di configurazione ...");
-			}
-			else {
+			} else {
 				// qui devo creare una instanza di configurazione di default e ricreare il file
 				System.out.println("Il file di configurazione non esiste #");
-				instance.configuration =  new DefaultDomT4jConfig();
-				// okok creo il file di configurazione 
-				£.convertFromObjectToXML(DomT4jConfig.class,"conf"+File.separator+"domt4j.xml",instance.configuration);
+				instance.configuration = new DefaultDomT4jConfig();
+				// okok creo il file di configurazione
+				£.convertFromObjectToXML(DomT4jConfig.class, "conf" + File.separator + "domt4j.xml",
+						instance.configuration);
 				System.out.println("File di configurazione creato @");
 			}
-			
-		}
-		else {
+
+		} else {
 			// non esiste la cartella di configurazione
-			// 1 passo : la creo 
+			// 1 passo : la creo
 			CONF_DIR.mkdir();
 			System.out.println("La cartella di configurazione non esiste .. la si crea ...");
-			// creo una instanza di configurazione di default 
-			instance.configuration =  new DefaultDomT4jConfig();
-			// okok creo il file di configurazione 
-			£.convertFromObjectToXML(DomT4jConfig.class,"conf"+File.separator+"domt4j.xml",instance.configuration);
+			// creo una instanza di configurazione di default
+			instance.configuration = new DefaultDomT4jConfig();
+			// okok creo il file di configurazione
+			£.convertFromObjectToXML(DomT4jConfig.class, "conf" + File.separator + "domt4j.xml",
+					instance.configuration);
 			System.out.println("File di configurazione creato @");
 		}
 		// qui devo prendere tutti i valori della configurazione
 		/*
-		 		COLORS
+		 * COLORS
 		 */
 		// command and parameter colors
-		ColorConfig parameterColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("parameter");
-		ColorConfig commandColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("command");
-		ColorConfig phaseColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("phase");
-		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei colori del terminale 
-		if (parameterColorConfig!=null) TerminalColors.PARAMETER_COLOR = parameterColorConfig.color;
-		if(commandColorConfig!=null)TerminalColors.COMMAND_COLOR = commandColorConfig.color;
-		if (phaseColorConfig!=null)TerminalColors.PHASE_COLOR = phaseColorConfig.color;
+		ColorConfig parameterColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("parameter");
+		ColorConfig commandColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("command");
+		ColorConfig phaseColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("phase");
+		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei
+		// colori del terminale
+		if (parameterColorConfig != null)
+			TerminalColors.PARAMETER_COLOR = parameterColorConfig.color;
+		if (commandColorConfig != null)
+			TerminalColors.COMMAND_COLOR = commandColorConfig.color;
+		if (phaseColorConfig != null)
+			TerminalColors.PHASE_COLOR = phaseColorConfig.color;
 		// nodes colors
-		ColorConfig nodeNameColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("nodeName");
+		ColorConfig nodeNameColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("nodeName");
 		ColorConfig tagColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("tag");
-		ColorConfig attributeValueColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("attribute_value");
-		ColorConfig commentColorConfig = (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("comment");
-		ColorConfig nodeValueColorConfig =  (ColorConfig) instance.configuration.colorsConfiguration.getConfigByTarget("nodeValue");
-		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei colori dei nodi 
-		if (nodeNameColorConfig!=null)DomColors.NODENAME_COLOR = nodeNameColorConfig.color;
-		if (tagColorConfig!=null)DomColors.TAG_COLOR = tagColorConfig.color;
-		if (commentColorConfig!=null)DomColors.COMMENT_COLOR =commentColorConfig.color;
-		if (attributeValueColorConfig!=null)DomColors.ATTRIBUTE_VALUE_COLOR = attributeValueColorConfig.color;
-		if (nodeValueColorConfig!=null)DomColors.NODEVALUE_COLOR = nodeValueColorConfig.color;
+		ColorConfig attributeValueColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("attribute_value");
+		ColorConfig commentColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("comment");
+		ColorConfig nodeValueColorConfig = (ColorConfig) instance.configuration.colorsConfiguration
+				.getConfigByTarget("nodeValue");
+		// qui devo verificare se abbiamo ottenuto le rispettive configurazioni dei
+		// colori dei nodi
+		if (nodeNameColorConfig != null)
+			DomColors.NODENAME_COLOR = nodeNameColorConfig.color;
+		if (tagColorConfig != null)
+			DomColors.TAG_COLOR = tagColorConfig.color;
+		if (commentColorConfig != null)
+			DomColors.COMMENT_COLOR = commentColorConfig.color;
+		if (attributeValueColorConfig != null)
+			DomColors.ATTRIBUTE_VALUE_COLOR = attributeValueColorConfig.color;
+		if (nodeValueColorConfig != null)
+			DomColors.NODEVALUE_COLOR = nodeValueColorConfig.color;
 		/*
-		 
-		 		TERMINAL.NAME
-		 
+		 * 
+		 * TERMINAL.NAME
+		 * 
 		 */
 		// non teniamo conto per il momento di questa configurazione
 		// quindi configuriamo con il valore di default
@@ -209,6 +227,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final Parameter charsetDocumentParam;
 		final Parameter nodeNameParam;
 		final Parameter nodeValueParam;
+		final Parameter attrParam;
 		Parameter appendParam;
 		nodeTypeParam = createCommand.addParam("nodeType",
 				"Specify the node type - " + j£.colors("(", Color.GREEN)
@@ -223,7 +242,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				"Specify the document type - " + j£.colors("(", Color.GREEN) + j£
 						.colors("html" + j£.colors("|", Color.DEFAULT) + j£.colors("xml", Color.MAGENTA), Color.MAGENTA)
 						+ j£.colors(")", Color.GREEN));
+		attrParam = createCommand.addParam("attr", "attribute");
 		charsetDocumentParam = createCommand.addParam("charset", "Specify the document charset");
+		attrParam.setInputValueExploitable(true);
 		nodeTypeParam.setInputValueExploitable(true);
 		nodeNameParam.setInputValueExploitable(true);
 		nodeValueParam.setInputValueExploitable(true);
@@ -250,7 +271,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 						// chiedo il nome dell'elemento root
 						System.out.print("Root element name:");
 						String rootElementName = £._I();
-						instance.currentNode = new XMLColorDocument(Document.CHARSET_UTF_8,null, rootElementName);
+						instance.currentNode = new XMLColorDocument(Document.CHARSET_UTF_8, null, rootElementName);
 						return positiveMsg("Document " + j£.colors("XML", Color.CYAN) + " is created");
 					} else {
 						return error("Document type is not valid - Available types= xml|html");
@@ -258,12 +279,13 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				} else if (nodeType.equals("element")) {
 					if (instance.currentNode != null) {
 						// chiedo il nome dell'elemento
-						if (instance.currentNode!=null) {
+						if (instance.currentNode != null) {
 							System.out.print("Element Name:");
 							String elementName = £._I();
 							if (instance.currentNode.getDocument() instanceof HTMLDocument) {
-								// html 
-								Element element = ((HTMLColorDocument)instance.currentNode.getDocument()).createColorElement(elementName);
+								// html
+								Element element = ((HTMLColorDocument) instance.currentNode.getDocument())
+										.createColorElement(elementName);
 								if (element != null) {
 									// appendo automaticamente
 									instance.currentNode.appendChild(element);
@@ -272,10 +294,10 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 								} else {
 									return error("Element creation failed");
 								}
-							}
-							else {
+							} else {
 								// xml
-								Element element = ((XMLColorDocument)instance.currentNode.getDocument()).createElement(elementName);
+								Element element = ((XMLColorDocument) instance.currentNode.getDocument())
+										.createElement(elementName);
 								if (element != null) {
 									// appendo automaticamente
 									instance.currentNode.appendChild(element);
@@ -310,93 +332,92 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// parameter executions - create :
 		// - NODETYPE
 		nodeTypeParam.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				// questo comando è la chiave per creare la configurazione 
-				
-				if (nodeTypeParam.getInputValue()!=null) {
-					
+				// questo comando è la chiave per creare la configurazione
+
+				if (nodeTypeParam.getInputValue() != null) {
+
 					NodeConfiguration conf = new NodeConfiguration();
-					
+
 					conf.setNodeType(nodeTypeParam.getInputValue());
-					
+
 					// condivido la conf
-					
+
 					createCommand.shareObject(conf);
 					return setOk("Node type");
 				}
-				return null ;
+				return null;
 			}
 		});
 		// - FORMAT
 		documentTypeParam.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				
+
 				// qui si scegli il tipo di documento
-				
+
 				// prima cosa verifico che la configurazione ci sia
-				
-				if (createCommand.getSharedObject()!=null) {
-					
-					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
-						
+
+				if (createCommand.getSharedObject() != null) {
+
+					if (createCommand.getSharedObject() instanceof NodeConfiguration) {
+
 						// verifico che la configurazione rispecchi un documento
 						NodeConfiguration conf = createCommand.getSharedObject();
-						if (conf.getNodeType()!=null) {
+						if (conf.getNodeType() != null) {
 							if (conf.getNodeType().equals("document")) {
-								if (documentTypeParam.getInputValue()!=null) {
+								if (documentTypeParam.getInputValue() != null) {
 									// qui finalmente procediamo impostando il formato del documento :)
 									conf.setDocumentType(documentTypeParam.getInputValue());
 									return setOk("Document format");
 								}
-							}
-							else {
+							} else {
 								return error("The node is not a document");
 							}
-						}
-						else {
+						} else {
 							// non abbiamo settato il tipo di nodo
 							return error("Node type is not set");
 						}
-					}
-					else {
+					} else {
 						// error #1 : l'oggetto condiviso non rispecchia quello previsto
 						return error("The shared object does not reflect the expected one");
 					}
-				}
-				else {
+				} else {
 					// da definire ...
 					return error("Configuration not present - You must specify the nodeType");
 				}
-				
+
 				return null;
 			}
 		});
 		// - NODENAME
 		nodeNameParam.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
 				// 1 passo : controllo se abbiamo una configurazione
-				if (createCommand.getSharedObject()!=null) {
-					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
-						if (nodeNameParam.getInputValue()!=null) {
+				if (createCommand.getSharedObject() != null) {
+					if (createCommand.getSharedObject() instanceof NodeConfiguration) {
+						if (nodeNameParam.getInputValue() != null) {
 							NodeConfiguration c = createCommand.getSharedObject();
 							c.setNodeName(nodeNameParam.getInputValue());
-							return setOk("Node name");
+							if (c.getNodeName().contains(",")) {
+								return setOk2("Nodes names");
+							}
+							else {
+								return setOk("Node name");
+							}
 						}
-					}
-					else {
+					} else {
 						return error("The shared object does not reflect the expected one");
 					}
-				}
-				else {
+				} else {
 					return error("Configuration not present - You must specify the nodeType");
 				}
-				return null ;
+				return null;
 			}
 		});
 		// - NODEVALUE
@@ -409,147 +430,187 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				// controllo da quale comando è partito il parametro
 				if (parent.getCommand().equals(createCommand.getCommand())) {
 					// CREATE
-					// qui controllo che sia una configurazione 
-					if (createCommand.getSharedObject()!=null) {
-						if (createCommand.getSharedObject()instanceof NodeConfiguration) {
-							
-							if (parameter.getInputValue()!=null) {
-								
-								((NodeConfiguration)createCommand.getSharedObject()).setNodeValue(parameter.getInputValue());
+					// qui controllo che sia una configurazione
+					if (createCommand.getSharedObject() != null) {
+						if (createCommand.getSharedObject() instanceof NodeConfiguration) {
+
+							if (parameter.getInputValue() != null) {
+
+								((NodeConfiguration) createCommand.getSharedObject())
+										.setNodeValue(parameter.getInputValue());
 								if (parameter.getInputValue().contains(",")) {
 									return setOk2("Nodes values");
-								}
-								else {
+								} else {
 									return setOk("Node value");
 								}
 							}
-						}
-						else {
+						} else {
 							return error("The shared object does not reflect the expected one");
 						}
-					}
-					else {
+					} else {
 						return error("Configuration not present - You must specify the nodeType");
 					}
-				}
-				else {
+				} else {
 					// SET
-					// qui dobbiamo settare il node value sul nodo corrente 
+					// qui dobbiamo settare il node value sul nodo corrente
 					// controllo che si sia un nodo corrente
-					if (instance.currentNode!=null) {
-						if (parameter.getInputValue()!=null) {
+					if (instance.currentNode != null) {
+						if (parameter.getInputValue() != null) {
 							instance.currentNode.setNodeValue(parameter.getInputValue());
 							return setOk("Node value");
 						}
-					}
-					else {
+					} else {
 						return error("There is no current node");
 					}
 				}
-				return null ;
+				return null;
 			}
 		});
 		// - APPEND
 		appendParam.setExecution(new Execution() {
 			@Override
 			public Object exec() {
-				if (createCommand.getSharedObject()!=null) {
-					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+				if (createCommand.getSharedObject() != null) {
+					if (createCommand.getSharedObject() instanceof NodeConfiguration) {
 						// ottengo la configurazione e creo il nodo in base ai suoi dati
 						NodeConfiguration c = createCommand.getSharedObject();
 						// cancello l'oggetto condiviso
 						createCommand.shareObject(null);
 						// prima cosa verifico il tipo di nodo
-						if (c.getNodeType()!=null) {
+						if (c.getNodeType() != null) {
 							if (c.getNodeType().equals("document")) {
 								// controllo il formato
-								if (c.getDocumentType()!=null) {
-									Document document = null ;
+								if (c.getDocumentType() != null) {
+									Document document = null;
 									if (c.getDocumentType().equals("xml")) {
 										document = new XMLColorDocument();
-									}
-									else if(c.getDocumentType().equals("html")) {
+									} else if (c.getDocumentType().equals("html")) {
 										JjDom.newDocument().useDoctype(true).setMinimalTags().home().jqueryInit();
 										document = JjDom.document;
 									}
-									instance.currentNode = document ;
-								}
-								else {
+									instance.currentNode = document;
+								} else {
 									return error("Document format is not set");
 								}
 							}
 							// in questi altri due casi, dobbiamo considerare che ci possono
 							// essere + nodi specificati
-							else if(c.getNodeType().equals("element")) {
-								
+							else if (c.getNodeType().equals("element")) {
+
 								// per prima cosa controllo se abbiamo un nodo corrente
-								// dentro cui appendere 
-								
-								if (instance.currentNode!=null) {
+								// dentro cui appendere
+
+								if (instance.currentNode != null) {
 									// controllo il nodeName per prima cosa
-									
-									if (c.getNodeName()!=null) {
+
+									if (c.getNodeName() != null) {
 										// controllo se sono multipli
-										List<Element>elements = new ArrayList<Element>(); ;
+										List<Element> elements = new ArrayList<Element>();
+										;
 										if (c.getNodeName().contains(",")) {
-											String[]split = c.getNodeName().split(",");
+											String[] split = c.getNodeName().split(",");
 											for (int i = 0; i < split.length; i++) {
 												split[i] = split[i].trim();
-												Element element = instance.currentNode.getDocument().createElement(split[i]);
+												Element element = instance.currentNode.getDocument()
+														.createElement(split[i]);
 												elements.add(element);
 											}
-										}
-										else elements.add(instance.currentNode.getDocument().createElement(c.getNodeName()));
+										} else
+											elements.add(
+													instance.currentNode.getDocument().createElement(c.getNodeName()));
 										// okok si procede : si controlla il nodeValue
-										if (c.getNodeValue()!=null) {
+										if (c.getNodeValue() != null) {
 											if (c.getNodeValue().contains(",")) {
-												String[]split = c.getNodeValue().split(",");
+												String[] split = c.getNodeValue().split(",");
 												for (int j = 0; j < elements.size(); j++) {
-													if (j<=split.length-1) {
+													if (j <= split.length - 1) {
 														elements.get(j).setNodeValue(split[j]);
 													}
 												}
-											}
-											else {
+											} else {
 												// qui setto solo il primo degli elementi pescati nella lista
 												elements.get(0).setNodeValue(c.getNodeValue());
 											}
 										}
-										// okok possiamo appendere gli elementi 
+										// procedo con il controllo dell'attributo
+										if (c.getAttribute() != null) {
+
+											// in tanto distinguo attr/val
+
+											String[] split = c.getAttribute().split(" ");
+											if (split.length == 2) {
+												String attr = split[0].trim();
+												String val = split[1].trim();
+												elements.get(0).setAttribute(attr, val);
+											} 
+										}
+										// okok possiamo appendere gli elementi
 										StringBuffer s = new StringBuffer();
-										for (Element element:elements) {
-											instance.currentNode.appendChild(element);
-											s.append(positiveMsg("The \""+j£.colors(element.getNodeName(),DomColors.NODENAME_COLOR)+"\" node has been added to the \""+j£.colors(instance.currentNode.getNodeName(),DomColors.NODENAME_COLOR)+"\" node")+"\n");
+										for (int i = 0; i < elements.size(); i++) {
+											instance.currentNode.appendChild(elements.get(i));
+											if (i < elements.size() - 1) {
+												s.append(
+														positiveMsg(
+																"The \"" + j£.colors(elements.get(i).getNodeName(),
+																		DomColors.NODENAME_COLOR)
+																		+ "\" node has been added to the \""
+																		+ j£.colors(instance.currentNode.getNodeName(),
+																				DomColors.NODENAME_COLOR)
+																		+ "\" node")
+																+ "\n");
+											} else {
+												s.append(positiveMsg("The \""
+														+ j£.colors(elements.get(i).getNodeName(),
+																DomColors.NODENAME_COLOR)
+														+ "\" node has been added to the \""
+														+ j£.colors(instance.currentNode.getNodeName(),
+																DomColors.NODENAME_COLOR)
+														+ "\" node"));
+											}
 										}
 										return s.toString();
-									}
-									else {
+									} else {
 										return error("Node name is not set");
 									}
-								}
-								else {
+								} else {
 									return error("There is no current node");
 								}
-							}
-							else if(c.getNodeType().equals("comment")) {
+							} else if (c.getNodeType().equals("comment")) {
 								// definire qui ...
-							}
-							else {
+							} else {
 								return error("Node type is not valid");
 							}
-						}
-						else {
+						} else {
 							return error("Node type is not set");
 						}
-					}
-					else {
+					} else {
 						return error("The shared object does not reflect the expected one");
 					}
-				}
-				else {
+				} else {
 					return error("Configuration not present - You must specify the nodeType");
 				}
-				return null ;
+				return null;
+			}
+		});
+		// - ATTR
+		attrParam.setExecution(new Execution() {
+			@Override
+			public Object exec() {
+				// verifico che ci sia una configurazione
+				if (createCommand.getSharedObject() != null) {
+					if (createCommand.getSharedObject() instanceof NodeConfiguration) {
+						if (attrParam.getInputValue() != null) {
+							NodeConfiguration conf = createCommand.getSharedObject();
+							conf.setAttribute(attrParam.getInputValue());
+							return setOk("Attribute");
+						}
+					} else {
+						return error("The shared object does not reflect the expected one");
+					}
+				} else {
+					return error("Configuration not present - You must specify the nodeType");
+				}
+				return null;
 			}
 		});
 		// 2 comando : cd
@@ -647,59 +708,52 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return null;
 			}
 		});
-		
-		
+
 		// set params :
-		
+
 		// come prima cosa condivido il parametro nodeValue da create
-		
+
 		setCommand.shareItEntirely(nodeValueParam);
-		
+
 		final Parameter attribute;
-		attribute = setCommand.addParam("attribute","Specify the attribute");
+		attribute = setCommand.addParam("attribute", "Specify the attribute");
 		attribute.setInputValueExploitable(true);
 		attribute.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				
-				if (instance.currentNode!=null) {
-					if (attribute.getInputValue()!=null) {
-						// otteniamo valore e prop 
-						String value, attrib ;
-						
+
+				if (instance.currentNode != null) {
+					if (attribute.getInputValue() != null) {
+						// otteniamo valore e prop
+						String value, attrib;
+
 						String input = attribute.getInputValue();
-						if (input.split(" ").length==2) {
-							
+						if (input.split(" ").length == 2) {
+
 							attrib = input.split(" ")[0];
 							value = input.split(" ")[1];
-							
-							// imposto l'attributo 
-							
+
+							// imposto l'attributo
+
 							if (instance.currentNode instanceof Element) {
-								((Element)instance.currentNode).setAttribute(attrib, value);
+								((Element) instance.currentNode).setAttribute(attrib, value);
 								return setOk(attrib);
-							}
-							else {
+							} else {
 								// da definire ...
 							}
-						}
-						else {
+						} else {
 							// da definire ,..
 						}
-					}
-					else {
+					} else {
 						// da definire ,..
 					}
-					
-					
-					
-				}
-				else {
+
+				} else {
 					// da definire ...
 				}
-				
-				return null ;
+
+				return null;
 			}
 		});
 		// 5 comando:markup: ottiene il markup del nodo corrente
@@ -709,14 +763,15 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			@Override
 			public Object exec() {
 				if (instance.currentNode != null) {
-					String markup=null ;
+					String markup = null;
 					if (instance.currentNode instanceof Colorable) {
-						markup = ((Colorable)instance.currentNode).getColorMarkup();
-					}
-					else {
+						markup = ((Colorable) instance.currentNode).getColorMarkup();
+					} else {
 						markup = instance.currentNode.getMarkup();
 					}
-					return "===================================================================================\n"+markup+"===================================================================================";
+					return "===================================================================================\n"
+							+ markup
+							+ "===================================================================================";
 				} else {
 					// da definire ...
 					return null;
@@ -724,34 +779,34 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// 6 comando: preview
-		preview = new ColorLocalCommand("preview","From a preview of the page on the browser");
+		preview = new ColorLocalCommand("preview", "From a preview of the page on the browser");
 		preview.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				if (instance.currentNode!=null) {
-					
-					if (instance.currentNode.getDocument()instanceof HTMLDocument) {
-						
+				if (instance.currentNode != null) {
+
+					if (instance.currentNode.getDocument() instanceof HTMLDocument) {
+
 						JjDom.preview();
-						
-					}
-					else {
+
+					} else {
 						// da definire ...
 						if (Desktop.isDesktopSupported()) {
-							
-							// salvo il file 
+
+							// salvo il file
 							java.io.File xmlFile = new java.io.File("preview.xml");
-							j£.writeFile(xmlFile,false,new String[] {instance.currentNode.getDocument().getMarkup()});
-							// apro il file 
-							
+							j£.writeFile(xmlFile, false,
+									new String[] { instance.currentNode.getDocument().getMarkup() });
+							// apro il file
+
 							try {
 								Desktop.getDesktop().browse(xmlFile.toURI());
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							
+
 							try {
 								Thread.sleep(1000);
 							} catch (InterruptedException e) {
@@ -762,36 +817,35 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 							xmlFile.deleteOnExit();
 						}
 					}
-					
-				}
-				else {
+
+				} else {
 					// da definire ...
 				}
-				return null ;
+				return null;
 			}
 		});
 		// command : exit
-		exit = new ColorLocalCommand("exit","closes the program");
+		exit = new ColorLocalCommand("exit", "closes the program");
 		exit.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				
+
 				// disistallo jansi
-				
+
 				j£.ANSI_CONSOLE.systemUninstall();
-				
+
 				System.out.println("Good bye !!");
-				
+
 				System.exit(0);
-				
-				return null ;
+
+				return null;
 			}
 		});
 		// command : helps
-		helps = new ColorLocalCommand("helps","Shows the commands list");
+		helps = new ColorLocalCommand("helps", "Shows the commands list");
 		helps.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
 				ColorString string = new ColorString();
@@ -799,28 +853,36 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				string.append("Commands List :\n");
 				string.append("------------------------------------------------------------------------\n");
 				Collection<LocalCommand> collection = instance.commands.values();
-				List<LocalCommand>commands = new ArrayList<LocalCommand>();
-				Iterator<LocalCommand>iterator = collection.iterator();
+				List<LocalCommand> commands = new ArrayList<LocalCommand>();
+				Iterator<LocalCommand> iterator = collection.iterator();
 				while (iterator.hasNext()) {
 					LocalCommand localCommand = (LocalCommand) iterator.next();
 					commands.add(localCommand);
 				}
 				Collections.sort(commands);
 				for (int i = 0; i < commands.size(); i++) {
-					if (i < commands.size()-1) {
-						if (commands.get(i).getBelongsTo()!=null) {
-							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append(commands.get(i).getBelongsTo().phaseName(),TerminalColors.PHASE_COLOR).append("\n");
+					if (i < commands.size() - 1) {
+						if (commands.get(i).getBelongsTo() != null) {
+							string.append("* Command:")
+									.append(commands.get(i).getCommand(), TerminalColors.COMMAND_COLOR)
+									.append(" -  Phase:")
+									.append(commands.get(i).getBelongsTo().phaseName(), TerminalColors.PHASE_COLOR)
+									.append("\n");
+						} else {
+							string.append("* Command:")
+									.append(commands.get(i).getCommand(), TerminalColors.COMMAND_COLOR)
+									.append(" -  Phase:").append("null", Color.DEFAULT).append("\n");
 						}
-						else {
-							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append("null",Color.DEFAULT).append("\n");
-						}
-					}
-					else {
-						if (commands.get(i).getBelongsTo()!=null) {
-							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append(commands.get(i).getBelongsTo().phaseName(),TerminalColors.PHASE_COLOR);
-						}
-						else {
-							string.append("* Command:").append(commands.get(i).getCommand(),TerminalColors.COMMAND_COLOR).append(" -  Phase:").append("null",Color.DEFAULT);
+					} else {
+						if (commands.get(i).getBelongsTo() != null) {
+							string.append("* Command:")
+									.append(commands.get(i).getCommand(), TerminalColors.COMMAND_COLOR)
+									.append(" -  Phase:")
+									.append(commands.get(i).getBelongsTo().phaseName(), TerminalColors.PHASE_COLOR);
+						} else {
+							string.append("* Command:")
+									.append(commands.get(i).getCommand(), TerminalColors.COMMAND_COLOR)
+									.append(" -  Phase:").append("null", Color.DEFAULT);
 						}
 					}
 				}
@@ -828,10 +890,10 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// command : config
-		config = new ColorLocalCommand("config","DomT4j configuration");
-		Parameter show = config.addParam("show","This parameter shows the configuration");
+		config = new ColorLocalCommand("config", "DomT4j configuration");
+		Parameter show = config.addParam("show", "This parameter shows the configuration");
 		show.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
 				try {
@@ -840,39 +902,38 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				return null ;
+				return null;
 			}
 		});
 		// inserisco i comandi nel terminale, quelli generali
 		instance.addCommands(cdCommand, lsCommand, markup, preview, setCommand, exit, helps, config);
-	
+
 		//////////////////////////////////////////////////////////////////////////
-		//  PHASES DEV :
+		// PHASES DEV :
 		//////////////////////////////////////////////////////////////////////////
-		
-		
-		Phase creationPhase,migrationPhase;
-		
-		
-		// 1 PHASE : CREATE 
-		
-		creationPhase = instance.createPhase(1, "creation","In questa fase si crea e imposta un nodo dom",createCommand);
-		
-		// 2 PHASE : MIGRATION 
-		
+
+		Phase creationPhase, migrationPhase;
+
+		// 1 PHASE : CREATE
+
+		creationPhase = instance.createPhase(1, "creation", "In questa fase si crea e imposta un nodo dom",
+				createCommand);
+
+		// 2 PHASE : MIGRATION
+
 		// commands :
-		final ColorLocalCommand connect,migrate ;
-		
-		connect = new ColorLocalCommand("connect","Connection to ftp server");
-		
-		migrate = new ColorLocalCommand("migrate","migrate the document");
-		
+		final ColorLocalCommand connect, migrate;
+
+		connect = new ColorLocalCommand("connect", "Connection to ftp server");
+
+		migrate = new ColorLocalCommand("migrate", "migrate the document");
+
 		migrate.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
 				// controllo che ci sia una configurazione pronta
-				if (connect.getSharedObject()!=null) {
+				if (connect.getSharedObject() != null) {
 					FTPServerConfiguration conf = connect.getSharedObject();
 					// cancello l'oggetto condiviso
 					connect.shareObject(null);
@@ -882,112 +943,108 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 						String urlResource = j£._I();
 						System.out.println("Migration in progress ...");
 						// mi connetto al server
-						JjDom.connect(conf.getHost(), conf.getUsername(), conf.getPassword()).migrate(urlResource,instance.currentNode.getDocument());
-					}
-					else {
+						JjDom.connect(conf.getHost(), conf.getUsername(), conf.getPassword()).migrate(urlResource,
+								instance.currentNode.getDocument());
+					} else {
 						error("The configuration is not complete");
 					}
-				}
-				else {
+				} else {
 					// da definire ...
 				}
-				
-				return null ;
+
+				return null;
 			}
 		});
-		
-		final Parameter host ;
+
+		final Parameter host;
 		final Parameter user;
 		final Parameter passw;
-		
-		host = connect.addParam("host","ftp host");
-		user = connect.addParam("user","ftp username");
-		passw = connect.addParam("password","ftp password");
-		
+
+		host = connect.addParam("host", "ftp host");
+		user = connect.addParam("user", "ftp username");
+		passw = connect.addParam("password", "ftp password");
+
 		host.setInputValueExploitable(true);
 		user.setInputValueExploitable(true);
 		passw.setInputValueExploitable(true);
-		
+
 		host.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				// verifico che ci sia il valore da input 
-				
-				if (host.getInputValue()!=null) {
-					
-					
+				// verifico che ci sia il valore da input
+
+				if (host.getInputValue() != null) {
+
 					// okok mi preparo
-					
-					// l'oggetto configurazione apposito 
-					
+
+					// l'oggetto configurazione apposito
+
 					FTPServerConfiguration c = new FTPServerConfiguration();
-					
+
 					c.setHost(host.getInputValue());
-					
+
 					// condivido l'oggetto
-					
+
 					connect.shareObject(c);
-					
+
 					return setOk("Ftp-Host");
 				}
-				
-				return null ;
+
+				return null;
 			}
 		});
-		
+
 		user.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				if (connect.getSharedObject()!=null) {
-					
-					if (user.getInputValue()!=null) {
-						// ottengo la configurazione 
-						
+				if (connect.getSharedObject() != null) {
+
+					if (user.getInputValue() != null) {
+						// ottengo la configurazione
+
 						FTPServerConfiguration conf = connect.getSharedObject();
-						
+
 						conf.setUsername(user.getInputValue());
-						
+
 						return setOk("Ftp-User");
 					}
-				}
-				else {
+				} else {
 					// da definire ...
 				}
-				return null ;
+				return null;
 			}
 		});
-		
-		
+
 		passw.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				if (connect.getSharedObject()!=null) {
-					
-					if (passw.getInputValue()!=null) {
-						// ottengo la configurazione 
-						
+				if (connect.getSharedObject() != null) {
+
+					if (passw.getInputValue() != null) {
+						// ottengo la configurazione
+
 						FTPServerConfiguration conf = connect.getSharedObject();
-						
+
 						conf.setPassword(passw.getInputValue());
-						
+
 						return setOk("Ftp-Passw");
 					}
-				}
-				else {
+				} else {
 					// da definire ...
 				}
-				return null ;
+				return null;
 			}
 		});
-		
-		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete",connect,migrate);
-		
+
+		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete", connect, migrate);
+
 		// okok verificare qual'è il problema ....
-		
+
 	}
+
 	private static void describeNodes(NodeList listNodes) {
 		System.out.println("___________________________________________________________________________________\n");
 		for (int i = 0; i < listNodes.getLength(); i++) {
@@ -1008,12 +1065,13 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 		if (currentPhase != null) {
 			if (instance.configuration.phaseVisible) {
-				myCommandRequest.append("_(" + j£.colors(currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR) + ")_");	
+				myCommandRequest.append(
+						"_(" + j£.colors(currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR) + ")_");
 			}
 		}
 		if (currentNode != null) {
-			myCommandRequest.append(
-					"_<" + j£.colors(currentNode.getNodeName().toUpperCase(), Color.MAGENTA) + ">_ "+j£.colors("~/"+currentNode.getPath(),Color.YELLOW)+j£.colors(":",Color.WHITE));
+			myCommandRequest.append("_<" + j£.colors(currentNode.getNodeName().toUpperCase(), Color.MAGENTA) + ">_ "
+					+ j£.colors("~/" + currentNode.getPath(), Color.YELLOW) + j£.colors(":", Color.WHITE));
 		} else {
 			myCommandRequest.append("_<" + j£.colors("NULL", Color.DEFAULT) + ">_:");
 		}

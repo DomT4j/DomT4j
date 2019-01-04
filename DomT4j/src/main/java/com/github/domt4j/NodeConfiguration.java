@@ -16,6 +16,7 @@ public class NodeConfiguration implements Config{
 	private String rootElementName; // valido per xml
 	private String append;
 	private String documentType ;
+	private String attribute ;
 	private final static String[]documentTypes= {"html","xml"};
 	private final static String[]nodeTypes = {"document","element","comment"};
 	public NodeConfiguration() {
@@ -26,8 +27,17 @@ public class NodeConfiguration implements Config{
 		this.append = null ;
 		this.rootElementName = null ;
 		this.documentType = null ;
+		this.attribute = null ;
 	}
 	
+	public String getAttribute() {
+		return attribute;
+	}
+
+	public void setAttribute(String attribute) {
+		this.attribute = attribute;
+	}
+
 	public String getDocumentType() {
 		return documentType;
 	}
