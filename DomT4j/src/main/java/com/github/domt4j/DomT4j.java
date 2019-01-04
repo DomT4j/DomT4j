@@ -395,32 +395,53 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// - NODEVALUE
-		nodeValueParam.setExecution(new Execution() {
-					
-					@Override
-					public Object exec() {
-						// 1 passo : controllo se abbiamo una configurazione
-						if (createCommand.getSharedObject()!=null) {
-							if (createCommand.getSharedObject()instanceof NodeConfiguration) {
-								if (nodeValueParam.getInputValue()!=null) {
-									NodeConfiguration c = createCommand.getSharedObject();
-									c.setNodeValue(nodeValueParam.getInputValue());
-									return setOk("Node value");
-								}
-							}
-							else {
-								return error("The shared object does not reflect the expected one");
+		// continuare da qui ...
+		nodeValueParam.setExecution(new SharedExecution() {
+			@Override
+			protected Object sharedExec(Sharer sharer) {
+				Parameter parameter = (Parameter) sharer;
+				Command parent = parameter.getParent();
+				// controllo da quale comando è partito il parametro
+				if (parent.getCommand().equals(createCommand.getCommand())) {
+					// CREATE
+					// qui controllo che sia una configurazione 
+					if (createCommand.getSharedObject()!=null) {
+						if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+							
+							if (nodeValueParam.getInputValue()!=null) {
+								
+								((NodeConfiguration)createCommand.getSharedObject()).setNodeValue(nodeValueParam.getInputValue());
+								
+								return setOk("Node value");
 							}
 						}
 						else {
-							return error("Configuration not present - You must specify the nodeType");
+							return error("The shared object does not reflect the expected one");
 						}
-						return null ;
 					}
-				});
+					else {
+						return error("Configuration not present - You must specify the nodeType");
+					}
+				}
+				else {
+					// SET
+					// qui dobbiamo settare il node value sul nodo corrente 
+					// controllo che si sia un nodo corrente
+					if (instance.currentNode!=null) {
+						if (nodeValueParam.getInputValue()!=null) {
+							instance.currentNode.setNodeValue(nodeValueParam.getInputValue());
+							return setOk("Node value");
+						}
+					}
+					else {
+						return error("There is no current node");
+					}
+				}
+				return null ;
+			}
+		});
 		// - APPEND
 		appendParam.setExecution(new Execution() {
-			
 			@Override
 			public Object exec() {
 				if (createCommand.getSharedObject()!=null) {
