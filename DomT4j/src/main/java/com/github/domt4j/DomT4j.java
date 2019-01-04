@@ -75,9 +75,14 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	static String error(String msg) {
 		return ansi().fg(Color.RED).a(msg + " #").reset().toString();
 	}
-
+	
 	static String setOk(String var) {
 		return ansi().fg(Color.WHITE).a("The " + var + " is set (" + ansi().fg(Color.CYAN).a("OK").reset() + ")")
+				.reset().toString();
+	}
+	
+	static String setOk2(String var) {
+		return ansi().fg(Color.WHITE).a("The " + var + " are set (" + ansi().fg(Color.CYAN).a("OK").reset() + ")")
 				.reset().toString();
 	}
 
@@ -408,11 +413,15 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					if (createCommand.getSharedObject()!=null) {
 						if (createCommand.getSharedObject()instanceof NodeConfiguration) {
 							
-							if (nodeValueParam.getInputValue()!=null) {
+							if (parameter.getInputValue()!=null) {
 								
-								((NodeConfiguration)createCommand.getSharedObject()).setNodeValue(nodeValueParam.getInputValue());
-								
-								return setOk("Node value");
+								((NodeConfiguration)createCommand.getSharedObject()).setNodeValue(parameter.getInputValue());
+								if (parameter.getInputValue().contains(",")) {
+									return setOk2("Nodes values");
+								}
+								else {
+									return setOk("Node value");
+								}
 							}
 						}
 						else {
@@ -428,8 +437,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					// qui dobbiamo settare il node value sul nodo corrente 
 					// controllo che si sia un nodo corrente
 					if (instance.currentNode!=null) {
-						if (nodeValueParam.getInputValue()!=null) {
-							instance.currentNode.setNodeValue(nodeValueParam.getInputValue());
+						if (parameter.getInputValue()!=null) {
+							instance.currentNode.setNodeValue(parameter.getInputValue());
 							return setOk("Node value");
 						}
 					}
@@ -493,10 +502,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 										if (c.getNodeValue()!=null) {
 											if (c.getNodeValue().contains(",")) {
 												String[]split = c.getNodeValue().split(",");
-												for (int i = 0; i < split.length; i++) {
-													split[i] = split[i].trim();
-													for (int j = 0; j < elements.size(); j++) {
-														elements.get(j).setNodeValue(split[i]);
+												for (int j = 0; j < elements.size(); j++) {
+													if (j<=split.length-1) {
+														elements.get(j).setNodeValue(split[j]);
 													}
 												}
 											}
@@ -506,12 +514,12 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 											}
 										}
 										// okok possiamo appendere gli elementi 
-
+										StringBuffer s = new StringBuffer();
 										for (Element element:elements) {
 											instance.currentNode.appendChild(element);
-											System.out.println(positiveMsg("The \""+j£.colors(element.getNodeName(),DomColors.NODENAME_COLOR)+"\" node has been added to the \""+j£.colors(instance.currentNode.getNodeName(),DomColors.NODENAME_COLOR)+"\" node"));
+											s.append(positiveMsg("The \""+j£.colors(element.getNodeName(),DomColors.NODENAME_COLOR)+"\" node has been added to the \""+j£.colors(instance.currentNode.getNodeName(),DomColors.NODENAME_COLOR)+"\" node")+"\n");
 										}
-										return null ;
+										return s.toString();
 									}
 									else {
 										return error("Node name is not set");
