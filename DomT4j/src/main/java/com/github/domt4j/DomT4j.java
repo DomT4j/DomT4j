@@ -395,7 +395,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		});
 		// - NODENAME
 		nodeNameParam.setExecution(new Execution() {
-
 			@Override
 			public Object exec() {
 				// 1 passo : controllo se abbiamo una configurazione
