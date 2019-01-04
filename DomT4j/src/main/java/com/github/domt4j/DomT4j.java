@@ -364,14 +364,114 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				}
 				else {
 					// da definire ...
+					return error("Configuration not present - You must specify the nodeType");
 				}
 				
 				return null;
 			}
 		});
 		// - NODENAME
-		
-		
+		nodeNameParam.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				// 1 passo : controllo se abbiamo una configurazione
+				if (createCommand.getSharedObject()!=null) {
+					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+						if (nodeNameParam.getInputValue()!=null) {
+							NodeConfiguration c = createCommand.getSharedObject();
+							c.setNodeName(nodeNameParam.getInputValue());
+							return setOk("Node name");
+						}
+					}
+					else {
+						return error("The shared object does not reflect the expected one");
+					}
+				}
+				else {
+					return error("Configuration not present - You must specify the nodeType");
+				}
+				return null ;
+			}
+		});
+		// - NODEVALUE
+		nodeValueParam.setExecution(new Execution() {
+					
+					@Override
+					public Object exec() {
+						// 1 passo : controllo se abbiamo una configurazione
+						if (createCommand.getSharedObject()!=null) {
+							if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+								if (nodeValueParam.getInputValue()!=null) {
+									NodeConfiguration c = createCommand.getSharedObject();
+									c.setNodeValue(nodeValueParam.getInputValue());
+									return setOk("Node value");
+								}
+							}
+							else {
+								return error("The shared object does not reflect the expected one");
+							}
+						}
+						else {
+							return error("Configuration not present - You must specify the nodeType");
+						}
+						return null ;
+					}
+				});
+		// - APPEND
+		appendParam.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				if (createCommand.getSharedObject()!=null) {
+					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
+						// ottengo la configurazione e creo il nodo in base ai suoi dati
+						NodeConfiguration c = createCommand.getSharedObject();
+						// prima cosa verifico il tipo di nodo
+						if (c.getNodeType()!=null) {
+							if (c.getNodeType().equals("document")) {
+								// controllo il formato
+								if (c.getDocumentType()!=null) {
+									Document document = null ;
+									if (c.getDocumentType().equals("xml")) {
+										document = new XMLColorDocument();
+									}
+									else if(c.getDocumentType().equals("html")) {
+										JjDom.newDocument().useDoctype(true).setMinimalTags().home().jqueryInit();
+										document = JjDom.document;
+									}
+									instance.currentNode = document ;
+								}
+								else {
+									return error("Document format is not set");
+								}
+							}
+							// in questi altri due casi, dobbiamo considerare che ci possono
+							// essere + nodi specificati
+							else if(c.getNodeType().equals("element")) {
+								
+							}
+							else if(c.getNodeType().equals("comment")) {
+
+							}
+							else {
+								return error("Node type is not valid");
+							}
+						}
+						else {
+							return error("Node type is not set");
+						}
+					}
+					else {
+						return error("The shared object does not reflect the expected one");
+					}
+				}
+				else {
+					return error("Configuration not present - You must specify the nodeType");
+				}
+				return null ;
+			}
+		});
 		// 2 comando : cd
 		cdCommand = new ColorLocalCommand("cd", "this command allows to change node");
 		// ha un valore da input
