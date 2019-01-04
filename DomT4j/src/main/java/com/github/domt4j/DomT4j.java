@@ -457,6 +457,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					if (createCommand.getSharedObject()instanceof NodeConfiguration) {
 						// ottengo la configurazione e creo il nodo in base ai suoi dati
 						NodeConfiguration c = createCommand.getSharedObject();
+						// cancello l'oggetto condiviso
+						createCommand.shareObject(null);
 						// prima cosa verifico il tipo di nodo
 						if (c.getNodeType()!=null) {
 							if (c.getNodeType().equals("document")) {
@@ -869,22 +871,18 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			
 			@Override
 			public Object exec() {
-				
 				// controllo che ci sia una configurazione pronta
 				if (connect.getSharedObject()!=null) {
-					
 					FTPServerConfiguration conf = connect.getSharedObject();
-					
+					// cancello l'oggetto condiviso
+					connect.shareObject(null);
 					// controllo che la configurazione sia pronta
 					if (conf.isCompleted()) {
-						
 						System.out.print("Destination URL:");
 						String urlResource = j£._I();
-						
 						System.out.println("Migration in progress ...");
 						// mi connetto al server
 						JjDom.connect(conf.getHost(), conf.getUsername(), conf.getPassword()).migrate(urlResource,instance.currentNode.getDocument());
-						
 					}
 					else {
 						error("The configuration is not complete");
