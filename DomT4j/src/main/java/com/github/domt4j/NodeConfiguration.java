@@ -1,6 +1,10 @@
 package com.github.domt4j;
 
+import org.fusesource.jansi.Ansi.Color;
+
 import com.github.domt4j.config.Config;
+
+import cloud.jgo.utils.command.color.ColorLocalCommand;
 
 public class NodeConfiguration implements Config{
 	
@@ -17,8 +21,8 @@ public class NodeConfiguration implements Config{
 	private String append;
 	private String documentType ;
 	private String attribute ;
-	private final static String[]documentTypes= {"html","xml"};
-	private final static String[]nodeTypes = {"document","element","comment"};
+	final static String[]documentTypes= {"html","xml"};
+	final static String[]nodeTypes = {"document","element","comment"};
 	public NodeConfiguration() {
 		// TODO Auto-generated constructor stub
 		this.nodeName = null ;
@@ -131,7 +135,7 @@ public class NodeConfiguration implements Config{
 		// TODO Auto-generated method stub
 		String result = null ;
 		try {
-			result =  DomT4j.toString(this);
+			result =  ColorLocalCommand.toString(this,Color.DEFAULT,Color.CYAN);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

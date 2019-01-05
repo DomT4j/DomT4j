@@ -22,6 +22,7 @@ import com.github.domt4j.config.colors.ColorConfig;
 import cloud.jgo.*;
 import cloud.jgo.io.File;
 import cloud.jgo.jjdom.JjDom;
+import cloud.jgo.jjdom.dom.Colorable;
 import cloud.jgo.jjdom.dom.DomColors;
 import cloud.jgo.jjdom.dom.nodes.Comment;
 import cloud.jgo.jjdom.dom.nodes.Document;
@@ -29,7 +30,6 @@ import cloud.jgo.jjdom.dom.nodes.Element;
 import cloud.jgo.jjdom.dom.nodes.Node;
 import cloud.jgo.jjdom.dom.nodes.NodeList;
 import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
-import cloud.jgo.jjdom.dom.nodes.html.color.Colorable;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.color.XMLColorDocument;
 import cloud.jgo.utils.ColorString;
@@ -89,32 +89,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	static String positiveMsg(String msg) {
 		return ansi().fg(Color.WHITE).a(msg + " (" + ansi().fg(Color.CYAN).a("OK").reset() + ")").reset().toString();
 	}
-
-	static String toString(Object obj) throws IllegalArgumentException, IllegalAccessException {
-		ColorString string = new ColorString();
-		string.append("------------------------------------------------------------------------\n");
-		string.append("" + obj.getClass().getSimpleName() + " - Configuration\n");
-		string.append("------------------------------------------------------------------------\n");
-		Class<?> clazz = obj.getClass();
-		Field[] fields = clazz.getDeclaredFields();
-		int count = 0;
-		for (Field field : fields) {
-			field.setAccessible(true);
-			String fieldName = field.getName();
-			Object fieldValue = field.get(obj);
-			if (count == 3) {
-				// si va a capo
-				count = 0;
-				string.append("\n\n");
-			} else {
-				string.append("* " + fieldName, Color.YELLOW).append("=", Color.WHITE)
-						.append(fieldValue + "", Color.DEFAULT).append("  ");
-			}
-			count++;
-		}
-		return string.toString() + "\n";
-	}
-
 	private DomT4j() {
 	}
 
@@ -1061,11 +1035,18 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// il server ha un nome
 		myCommandRequest.append(getName());
 		// controllo se abbiamo una fase corrente
-
 		if (currentPhase != null) {
-			if (instance.configuration.phaseVisible) {
-				myCommandRequest.append(
-						"_(" + j£.colors(currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR) + ")_");
+			if (currentPhase.getValue()==1) {
+				if (instance.configuration.firstPhaseVisible) {
+					myCommandRequest.append(
+							"_(" + j£.colors(currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR) + ")");
+				}
+			}
+			else {
+				if (instance.configuration.phaseVisible) {
+					myCommandRequest.append(
+							"_(" + j£.colors(currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR) + ")");
+				}	
 			}
 		}
 		if (currentNode != null) {
@@ -1074,7 +1055,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		} else {
 			myCommandRequest.append("_<" + j£.colors("NULL", Color.DEFAULT) + ">_:");
 		}
-
 		return myCommandRequest.toString();
 	}
 

@@ -7,7 +7,9 @@ import org.fusesource.jansi.Ansi.Color;
 
 import com.github.domt4j.config.Config;
 
+import cloud.jgo.j£;
 import cloud.jgo.utils.ColorString;
+import cloud.jgo.utils.command.color.ColorLocalCommand;
 @XmlRootElement(name="server.config")
 public class FTPServerConfiguration implements Config{
 	
@@ -62,7 +64,7 @@ public class FTPServerConfiguration implements Config{
 //		return buffer.toString();
 		String result = null ;
 		try {
-			result =  DomT4j.toString(this);
+			result =  ColorLocalCommand.toString(this,Color.DEFAULT,Color.CYAN);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

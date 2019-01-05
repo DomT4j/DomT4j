@@ -34,9 +34,11 @@
             <target>comment</target>
         </color.config>
         <color.config>
-            <color>DEFAULT</color>
+            <color>GREEN</color>
             <target>nodeValue</target>
         </color.config>
     </colors.config>
     <terminal.name>DomT4j</terminal.name>
+    <phase.visible>true</phase.visible>
+    <first.phase.visible>false</first.phase.visible>
 </DomT4j.config>

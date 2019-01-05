@@ -25,6 +25,7 @@ public class DefaultDomT4jConfig extends DomT4jConfig{
 		colorsConfiguration.colorConfig.add(new ColorConfig(Color.GREEN,"nodeValue"));
 		// phase.visible
 		phaseVisible = true ;
+		firstPhaseVisible = false ;
 	}
 		
 }

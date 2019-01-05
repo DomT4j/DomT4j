@@ -17,12 +17,15 @@ public class DomT4jConfig implements Config {
 	// 3 elemento : phase.visible
 	@XmlElement(name = "phase.visible")
 	public boolean phaseVisible;
+	@XmlElement(name = "first.phase.visible")
+	public boolean firstPhaseVisible;
 
 	public DomT4jConfig() {
 		// TODO Auto-generated constructor stub
 		this.colorsConfiguration = new ColorsConfig();
 		this.terminalName = null;
 		this.phaseVisible = true;
+		this.firstPhaseVisible = true ;
 	}
 
 	public String getTarget() {
