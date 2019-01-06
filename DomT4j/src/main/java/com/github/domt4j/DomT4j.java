@@ -324,7 +324,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					// condivido la conf
 
 					createCommand.shareObject(conf);
+					
 					String setOk = setOk("Node type");
+					
 					return setOk+"\n"+"Added new parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") to the \""+j£.colors(createCommand.getCommand(),TerminalColors.COMMAND_COLOR)+"\" command";
 				}
 				return null;
@@ -522,6 +524,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 												elements.get(0).setAttribute(attr, val);
 											} 
 										}
+										//"Added new parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") to the \""+j£.colors(createCommand.getCommand(),TerminalColors.COMMAND_COLOR)+"\" command";
 										// okok possiamo appendere gli elementi
 										StringBuffer s = new StringBuffer();
 										for (int i = 0; i < elements.size(); i++) {
@@ -534,7 +537,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 																		+ "\" node has been added to the \""
 																		+ j£.colors(instance.currentNode.getNodeName(),
 																				DomColors.NODENAME_COLOR)
-																		+ "\" node")
+																		+ "\" node.\n"+"Removed parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") from \""+j£.colors(createCommand.getCommand(),TerminalColors.COMMAND_COLOR)+"\" command")
 																+ "\n");
 											} else {
 												s.append(positiveMsg("The \""
@@ -543,7 +546,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 														+ "\" node has been added to the \""
 														+ j£.colors(instance.currentNode.getNodeName(),
 																DomColors.NODENAME_COLOR)
-														+ "\" node"));
+														+ "\" node.\n"+"Removed parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") from \""+j£.colors(createCommand.getCommand(),TerminalColors.COMMAND_COLOR)+"\" command"));
 											}
 										}
 										return s.toString();
