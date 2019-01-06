@@ -51,8 +51,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 	private static DomT4j instance = null;
 	public static final String DEFAULT_TERMINAL_NAME = j£.colors("DomT4j", Color.CYAN);
-	public final static File CONF_DIR = new File("conf");
-	public final static File CONF_FILE = new File(CONF_DIR, "domt4j.xml");
+	public final static File GLOBAL_CONF_DIR = new File("global-conf");
+	public final static File GLOBAL_CONF_FILE = new File(GLOBAL_CONF_DIR, "domt4j.xml");
 
 	// campi della classe
 
@@ -96,12 +96,12 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		/*
 		 * Config XML from HERE To §
 		 */
-		if (CONF_DIR.exists()) {
+		if (GLOBAL_CONF_DIR.exists()) {
 
 			// verifico se esiste il file di config
 
-			if (CONF_FILE.exists()) {
-				instance.configuration = (DomT4jConfig) £.convertFromXMLToObject(CONF_FILE, DomT4jConfig.class);
+			if (GLOBAL_CONF_FILE.exists()) {
+				instance.configuration = (DomT4jConfig) £.convertFromXMLToObject(GLOBAL_CONF_FILE, DomT4jConfig.class);
 				System.out.println("Abbiamo correttamente aquisito il file di configurazione ...");
 			} else {
 				// qui devo creare una instanza di configurazione di default e ricreare il file
@@ -116,7 +116,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		} else {
 			// non esiste la cartella di configurazione
 			// 1 passo : la creo
-			CONF_DIR.mkdir();
+			GLOBAL_CONF_DIR.mkdir();
 			System.out.println("La cartella di configurazione non esiste .. la si crea ...");
 			// creo una instanza di configurazione di default
 			instance.configuration = new DefaultDomT4jConfig();
@@ -183,6 +183,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
 		ColorLocalCommand.setInputHelpExploitable(true);
+		ColorLocalCommand.setToStringParamName("soc"); // config -so : returns shared object config
 		// imposto JjDom in modo tale che si adatti a un documento HTML colorato a
 		// livello di sintassi:
 		JjDom.documentTypeUsed = HTMLColorDocument.class;
@@ -190,11 +191,13 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markup, preview, exit, helps, config;
+		ColorLocalCommand getCommand, markup, preview, exit, helps;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("create", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
+		final ColorLocalCommand globalConfig = new ColorLocalCommand("global-config", "DomT4j Global configuration"); // global-config/domt4j.xml
+		final ColorLocalCommand config = new ColorLocalCommand("config","DomT4j configuration"); // global-config/config/domt4j.xml
 		// params :
 		final Parameter nodeTypeParam;
 		final Parameter documentTypeParam;
@@ -319,8 +322,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 					// condivido la conf
 
-					createCommand.shareObject(conf);
-					return setOk("Node type");
+					createCommand.shareObject(conf,config);
+					String setOk = setOk("Node type");
+					return setOk+"\n"+"Added new parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") to the \""+j£.colors("config",TerminalColors.COMMAND_COLOR)+"\" command";
 				}
 				return null;
 			}
@@ -863,14 +867,12 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// command : config
-		config = new ColorLocalCommand("config", "DomT4j configuration");
-		Parameter show = config.addParam("show", "This parameter shows the configuration");
-		show.setExecution(new Execution() {
-
+		Parameter file = globalConfig.addParam("file", "This parameter shows the global configuration file");
+		file.setExecution(new Execution() {
 			@Override
 			public Object exec() {
 				try {
-					return j£.readFile(CONF_FILE).trim();
+					return j£.readFile(GLOBAL_CONF_FILE).trim();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -878,8 +880,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return null;
 			}
 		});
+		
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(cdCommand, lsCommand, markup, preview, setCommand, exit, helps, config);
+		instance.addCommands(cdCommand, lsCommand, markup, preview, setCommand, exit, helps, globalConfig, config);
 
 		//////////////////////////////////////////////////////////////////////////
 		// PHASES DEV :
