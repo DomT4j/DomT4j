@@ -29,6 +29,7 @@ import cloud.jgo.jjdom.dom.nodes.Document;
 import cloud.jgo.jjdom.dom.nodes.Element;
 import cloud.jgo.jjdom.dom.nodes.Node;
 import cloud.jgo.jjdom.dom.nodes.NodeList;
+import cloud.jgo.jjdom.dom.nodes.html.HTMLComment;
 import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.color.XMLColorDocument;
@@ -554,6 +555,50 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 								}
 							} else if (c.getNodeType().equals("comment")) {
 								// definire qui ...
+								if (instance.currentNode!=null) {
+									List<Comment>elements = new ArrayList<Comment>();
+									if (c.getNodeValue() != null) {
+										if (c.getNodeValue().contains(",")) {
+											String[] split = c.getNodeValue().split(",");
+											for (int j = 0; j < split.length; j++) {
+												elements.add(instance.currentNode.getDocument().createComment(split[j]));
+											}
+										} else {
+											// qui setto solo il primo degli elementi pescati nella lista
+											elements.add(instance.currentNode.getDocument().createComment(c.getNodeValue()));
+										}
+										StringBuffer s = new StringBuffer();
+										for (int i = 0; i < elements.size(); i++) {
+											instance.currentNode.appendChild(elements.get(i));
+											if (i < elements.size() - 1) {
+												s.append(
+														positiveMsg(
+																"The \"" + j£.colors(elements.get(i).getNodeName(),
+																		DomColors.NODENAME_COLOR)
+																		+ "\" node has been added to the \""
+																		+ j£.colors(instance.currentNode.getNodeName(),
+																				DomColors.NODENAME_COLOR)
+																		+ "\" node")
+																+ "\n");
+											} else {
+												s.append(positiveMsg("The \""
+														+ j£.colors(elements.get(i).getNodeName(),
+																DomColors.NODENAME_COLOR)
+														+ "\" node has been added to the \""
+														+ j£.colors(instance.currentNode.getNodeName(),
+																DomColors.NODENAME_COLOR)
+														+ "\" node"));
+											}
+										}
+										return s.toString();
+									}
+									else {
+										return error("Node value is not set");
+									}
+									
+								} else {
+									return error("There is no current node");
+								}
 							} else {
 								return error("Node type is not valid");
 							}
