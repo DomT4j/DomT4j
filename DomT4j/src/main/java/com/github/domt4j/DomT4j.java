@@ -109,7 +109,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				System.out.println("Il file di configurazione non esiste #");
 				instance.configuration = new DefaultDomT4jConfig();
 				// okok creo il file di configurazione
-				£.convertFromObjectToXML(DomT4jConfig.class, "conf" + File.separator + "domt4j.xml",
+				£.convertFromObjectToXML(DomT4jConfig.class, "global-conf" + File.separator + "domt4j.xml",
 						instance.configuration);
 				System.out.println("File di configurazione creato @");
 			}
@@ -122,7 +122,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			// creo una instanza di configurazione di default
 			instance.configuration = new DefaultDomT4jConfig();
 			// okok creo il file di configurazione
-			£.convertFromObjectToXML(DomT4jConfig.class, "conf" + File.separator + "domt4j.xml",
+			£.convertFromObjectToXML(DomT4jConfig.class, "global-conf" + File.separator + "domt4j.xml",
 					instance.configuration);
 			System.out.println("File di configurazione creato @");
 		}
@@ -323,9 +323,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 					// condivido la conf
 
-					createCommand.shareObject(conf,config);
+					createCommand.shareObject(conf);
 					String setOk = setOk("Node type");
-					return setOk+"\n"+"Added new parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") to the \""+j£.colors("config",TerminalColors.COMMAND_COLOR)+"\" command";
+					return setOk+"\n"+"Added new parameter ("+j£.colors(ColorLocalCommand.getToStringParamName(),TerminalColors.PARAMETER_COLOR)+") to the \""+j£.colors(createCommand.getCommand(),TerminalColors.COMMAND_COLOR)+"\" command";
 				}
 				return null;
 			}
