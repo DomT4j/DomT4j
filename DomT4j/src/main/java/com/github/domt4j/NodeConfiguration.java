@@ -8,11 +8,7 @@ import cloud.jgo.utils.command.color.ColorLocalCommand;
 
 public class NodeConfiguration implements Config{
 	
-	// questa classe serve per creare
-	// giusto le variabili necessarie minimali
-	// per la creazione di un dato tipo di nodo.
-	// quindi si occupa di filtrare le info necessarie in base al nodo
-	// che si sta creando.
+	// Provvisoria, può contenere bugs
 	
 	private String nodeName ;
 	private String nodeValue;
@@ -21,6 +17,7 @@ public class NodeConfiguration implements Config{
 	private String append;
 	private String documentType ;
 	private String attribute ;
+	private boolean completed ;
 	final static String[]documentTypes= {"html","xml"};
 	final static String[]nodeTypes = {"document","element","comment"};
 	public NodeConfiguration() {
@@ -32,6 +29,7 @@ public class NodeConfiguration implements Config{
 		this.rootElementName = null ;
 		this.documentType = null ;
 		this.attribute = null ;
+		this.completed = false ;
 	}
 	
 	public String getAttribute() {
@@ -49,11 +47,11 @@ public class NodeConfiguration implements Config{
 	public boolean setDocumentType(String documentType) {
 		if (documentType.equals(documentTypes[0])||documentType.equals(documentTypes[1])) {
 			this.documentType = documentType;
-			return true ;
+			if (this.getNodeType().equals("document")&&documentType!=null) {
+				this.completed = true ;
+			}
 		}
-		else {
-			return false ;
-		}
+		return this.completed ;
 	}
 
 	public String getNodeName() {
@@ -62,6 +60,9 @@ public class NodeConfiguration implements Config{
 
 	public void setNodeName(String nodeName) {
 		this.nodeName = nodeName;
+		if (this.nodeType.equals("element")&&nodeName!=null) {
+			this.completed = true ;
+		}
 	}
 
 	public String getNodeValue() {
@@ -70,6 +71,9 @@ public class NodeConfiguration implements Config{
 
 	public void setNodeValue(String nodeValue) {
 		this.nodeValue = nodeValue;
+		if (this.nodeType.equals("comment")&&nodeValue!=null) {
+			this.completed = true ;
+		}
 	}
 
 	public String getNodeType() {
@@ -103,26 +107,7 @@ public class NodeConfiguration implements Config{
 	}
 
 	public boolean isCompleted() {
-		boolean configurated = false ;
-		if (nodeType!=null) {
-			if (nodeType.equals("document")) {
-				if (documentType!=null) {
-					configurated = true;
-				}
-			}
-			else if(nodeType.equalsIgnoreCase("element")){
-				if (nodeName!=null) {
-					configurated = true ;
-				}
-			}
-			else{
-				// comment
-				if (nodeValue!=null) {
-					configurated = true ;
-				}
-			}
-		}
-		return configurated ;
+		return this.completed ;
 	}
 
 	public String getTarget() {
