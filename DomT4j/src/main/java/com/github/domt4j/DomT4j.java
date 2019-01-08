@@ -168,7 +168,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		instance.getHelpCommands().sort();
 		instance.useGeneralHelp();
 		ColorLocalCommand.setInputHelpExploitable(true);
-		ColorLocalCommand.setToStringParamName("soc"); // config -so : returns shared object config
+		ColorLocalCommand.setToStringParamName("c"); // config -so : returns shared object config
 		// imposto JjDom in modo tale che si adatti a un documento HTML colorato a
 		// livello di sintassi:
 		JjDom.documentTypeUsed = HTMLColorDocument.class;
@@ -932,11 +932,20 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		phase.setExecution(new Execution() { // provvisorio, controllare se la fase corrente esiste
-			
 			@Override
 			public Object exec() {
 				// TODO Auto-generated method stub
-				return "Current phase > "+j£.colors(instance.currentPhase.phaseName(),TerminalColors.PHASE_COLOR);
+				ColorString string = new ColorString();
+				string.append("\n\t\t|Current Phase > ").append(instance.currentPhase.phaseName().toUpperCase(),TerminalColors.PHASE_COLOR).append("\n")
+					  .append("\t\t|Level = ").append(instance.currentPhase.getValue()+"",Color.DEFAULT);
+				if (((DefaultPhase)instance.currentPhase).getAccessibilityRule()!=null) {
+					string.append("\n\t\t|Access-Rule = ").append(((DefaultPhase)instance.currentPhase).getAccessibilityRule().ruleExplanation(),Color.DEFAULT);
+				}
+				if (((DefaultPhase)instance.currentPhase).getSatisfiabilityRule()!=null) {
+					string.append("\n\t\t|Satisfaction-Rule = ").append(((DefaultPhase)instance.currentPhase).getSatisfiabilityRule().ruleExplanation(),Color.DEFAULT);
+				}
+				string.append("\n");
+				return string.toString() ;	   
 			}
 		});
 		node.setExecution(new Execution() {
@@ -961,6 +970,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return result ;
 			}
 		});
+		
+		n.setExecution(node.getExecution());
+		p.setExecution(phase.getExecution());
 		
 		// inserisco i comandi nel terminale, quelli generali
 		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand);
@@ -1098,7 +1110,42 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete", connect, migrate);
 
-		// okok verificare qual'è il problema ....
+		// mi creo le regole di migration 
+		
+		migrationPhase.accessibleThrough(new Rule() {
+			
+			public boolean verification() {
+				if (instance.currentNode!=null) {
+					if (instance.currentNode.getDocument()!=null) {
+						return true ;
+					}
+					else {
+						return false ;
+					}
+				}
+				else {
+					return false ;
+				}
+			}
+			
+			public String ruleExplanation() {
+				// TODO Auto-generated method stub
+				return "Accessible if there is a document";
+			}
+		});
+		
+		migrationPhase.satisfiableThrough(new Rule() {
+			
+			public boolean verification() {
+				// DA DEFINIRE ...
+				return false;
+			}
+			
+			public String ruleExplanation() {
+				// TODO Auto-generated method stub
+				return "Satisfied if the migration took place";
+			}
+		});
 
 	}
 

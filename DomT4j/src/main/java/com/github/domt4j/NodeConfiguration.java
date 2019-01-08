@@ -4,12 +4,12 @@ import org.fusesource.jansi.Ansi.Color;
 
 import com.github.domt4j.config.Config;
 
+import cloud.jgo.utils.command.annotations.£Command;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
-
+@£Command(command="Node",help = "This command cretes a node", involveAll=true)
 public class NodeConfiguration implements Config{
 	
 	// Provvisoria, può contenere bugs
-	
 	private String nodeName ;
 	private String nodeValue;
 	private String nodeType ;
