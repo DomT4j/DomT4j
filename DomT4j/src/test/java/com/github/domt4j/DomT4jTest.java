@@ -4,7 +4,7 @@ public class DomT4jTest {
 	
 public static void main(String[] args) {
 	
-	
+	// 1 passo : per approvare le modifiche jGo, creare i comandi per impostare i nodi specifici xml/html
 	// prossimo passo : gestire la multi utenza, in attesa che si risolva in jGo 1.0.9
 	// la feature che ci permette di condividere oggetti creando parametri automatici
 	// in base ai campi dell'oggetto condiviso, questo approccio non lo utilizzeremo però

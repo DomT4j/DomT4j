@@ -30,6 +30,7 @@ import cloud.jgo.jjdom.dom.nodes.Element;
 import cloud.jgo.jjdom.dom.nodes.Node;
 import cloud.jgo.jjdom.dom.nodes.NodeList;
 import cloud.jgo.jjdom.dom.nodes.html.HTMLComment;
+import cloud.jgo.jjdom.dom.nodes.html.HTMLDefaultElement;
 import cloud.jgo.jjdom.dom.nodes.html.HTMLDocument;
 import cloud.jgo.jjdom.dom.nodes.html.color.HTMLColorDocument;
 import cloud.jgo.jjdom.dom.nodes.xml.color.XMLColorDocument;
@@ -73,23 +74,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		return instance;
 	}
 
-	static String error(String msg) {
-		return ansi().fg(Color.RED).a(msg + " #").reset().toString();
-	}
-
-	static String setOk(String var) {
-		return ansi().fg(Color.WHITE).a("The " + var + " is set (" + ansi().fg(Color.CYAN).a("OK").reset() + ")")
-				.reset().toString();
-	}
-
-	static String setOk2(String var) {
-		return ansi().fg(Color.WHITE).a("The " + var + " are set (" + ansi().fg(Color.CYAN).a("OK").reset() + ")")
-				.reset().toString();
-	}
-
-	static String positiveMsg(String msg) {
-		return ansi().fg(Color.WHITE).a(msg + " (" + ansi().fg(Color.CYAN).a("OK").reset() + ")").reset().toString();
-	}
 	private DomT4j() {
 	}
 
@@ -192,11 +176,13 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markup, preview, exit, helps;
+		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, statusCommand;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("create", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
+		// 3 comando:status:stampa un resoconto approfondito di una determinata cosa
+		statusCommand = new ColorLocalCommand("status","Displays a report of ... Displays the parameters");
 		final ColorLocalCommand globalConfig = new ColorLocalCommand("global-config", "DomT4j Global configuration"); // global-config/domt4j.xml
 		final ColorLocalCommand config = new ColorLocalCommand("config","DomT4j configuration"); // global-config/config/domt4j.xml
 		// params :
@@ -782,8 +768,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// 5 comando:markup: ottiene il markup del nodo corrente
-		markup = new ColorLocalCommand("markup", "Gets the markup of the current node");
-		markup.setExecution(new Execution() {
+		markupCommand = new ColorLocalCommand("markup", "Gets the markup of the current node");
+		markupCommand.setExecution(new Execution() {
 
 			@Override
 			public Object exec() {
@@ -804,8 +790,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// 6 comando: preview
-		preview = new ColorLocalCommand("preview", "From a preview of the page on the browser");
-		preview.setExecution(new Execution() {
+		previewCommand = new ColorLocalCommand("preview", "From a preview of the page on the browser");
+		previewCommand.setExecution(new Execution() {
 
 			@Override
 			public Object exec() {
@@ -850,8 +836,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// command : exit
-		exit = new ColorLocalCommand("exit", "closes the program");
-		exit.setExecution(new Execution() {
+		exitCommand = new ColorLocalCommand("exit", "closes the program");
+		exitCommand.setExecution(new Execution() {
 
 			@Override
 			public Object exec() {
@@ -868,8 +854,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		// command : helps
-		helps = new ColorLocalCommand("helps", "Shows the commands list");
-		helps.setExecution(new Execution() {
+		helpsCommand = new ColorLocalCommand("helps", "Shows the commands list");
+		helpsCommand.setExecution(new Execution() {
 
 			@Override
 			public Object exec() {
@@ -929,8 +915,39 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		
+		// STATUS COMMAND : PARAMETERS
+		Parameter node,n,phase,p ;
+		
+		node = statusCommand.addParam("node","current node");
+		n = statusCommand.addParam("n","current node");
+		phase = statusCommand.addParam("phase","current phase");
+		p = statusCommand.addParam("p","current phase");
+		
+		node.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				String result = null ;
+				if (instance.currentNode!=null) {
+					try {
+						result = ColorLocalCommand.toString(instance.currentNode,Color.DEFAULT,Color.GREEN);
+					} catch (IllegalArgumentException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+				else {
+					// da definire ...
+				}
+				return result ;
+			}
+		});
+		
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(cdCommand, lsCommand, markup, preview, setCommand, exit, helps, globalConfig, config);
+		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand);
 
 		//////////////////////////////////////////////////////////////////////////
 		// PHASES DEV :
