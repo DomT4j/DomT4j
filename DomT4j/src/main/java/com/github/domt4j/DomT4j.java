@@ -916,13 +916,29 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		});
 		
 		// STATUS COMMAND : PARAMETERS
-		Parameter node,n,phase,p ;
+		final Parameter node = statusCommand.addParam("node","current node");
+		final Parameter n = statusCommand.addParam("n","current node");
+		final Parameter phase = statusCommand.addParam("phase","current phase");
+		final Parameter p = statusCommand.addParam("p","current phase");
 		
-		node = statusCommand.addParam("node","current node");
-		n = statusCommand.addParam("n","current node");
-		phase = statusCommand.addParam("phase","current phase");
-		p = statusCommand.addParam("p","current phase");
+		// status exec
 		
+		statusCommand.setExecution(new Execution() {
+			@Override
+			public Object exec() {
+
+				return phase.execute()+"\n"+node.execute();
+				
+			}
+		});
+		phase.setExecution(new Execution() { // provvisorio, controllare se la fase corrente esiste
+			
+			@Override
+			public Object exec() {
+				// TODO Auto-generated method stub
+				return "Current phase > "+j£.colors(instance.currentPhase.phaseName(),TerminalColors.PHASE_COLOR);
+			}
+		});
 		node.setExecution(new Execution() {
 			
 			@Override
