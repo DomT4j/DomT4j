@@ -9,9 +9,11 @@ import com.github.domt4j.config.Config;
 
 import cloud.jgo.j£;
 import cloud.jgo.utils.ColorString;
+import cloud.jgo.utils.command.annotations.CommandClass;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 @XmlRootElement(name="server.config")
-public class FTPServerConfiguration implements Config{
+@CommandClass(command="connection", help = "ftp connection config", involveAll=true)
+public class FTPConnectionConfiguration implements Config{
 	
 	private String host,username,password ;
 
@@ -20,7 +22,7 @@ public class FTPServerConfiguration implements Config{
 		return "ftp_server";
 	}
 	
-	public FTPServerConfiguration() {
+	public FTPConnectionConfiguration() {
 		// TODO Auto-generated constructor stub
 		this.host = null ;
 		this.username =null ;

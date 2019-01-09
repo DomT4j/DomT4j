@@ -176,13 +176,15 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, statusCommand;
+		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, statusCommand, pathCommand;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("create", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
 		// 3 comando:status:stampa un resoconto approfondito di una determinata cosa
 		statusCommand = new ColorLocalCommand("status","Displays a report of ... Displays the parameters");
+		// 4 comando:path
+		pathCommand = new ColorLocalCommand("path","Shows the path of the current node");
 		final ColorLocalCommand globalConfig = new ColorLocalCommand("global-config", "DomT4j Global configuration"); // global-config/domt4j.xml
 		final ColorLocalCommand config = new ColorLocalCommand("config","DomT4j configuration"); // global-config/config/domt4j.xml
 		// params :
@@ -780,9 +782,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					} else {
 						markup = instance.currentNode.getMarkup();
 					}
-					return "===================================================================================\n"
-							+ markup
-							+ "===================================================================================";
+					return markup;
 				} else {
 					// da definire ...
 					return null;
@@ -974,8 +974,29 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		n.setExecution(node.getExecution());
 		p.setExecution(phase.getExecution());
 		
+		// PATH COMMAND :
+		
+		pathCommand.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				
+				if (instance.currentNode!=null) {
+					return instance.currentNode.getPath();
+				}
+				else {
+					// da definire ...
+				}
+				
+				return null ;
+			}
+		});
+		
+		
+		
+		
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand);
+		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand, pathCommand);
 
 		//////////////////////////////////////////////////////////////////////////
 		// PHASES DEV :
@@ -1003,7 +1024,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			public Object exec() {
 				// controllo che ci sia una configurazione pronta
 				if (connect.getSharedObject() != null) {
-					FTPServerConfiguration conf = connect.getSharedObject();
+					FTPConnectionConfiguration conf = connect.getSharedObject();
 					// cancello l'oggetto condiviso
 					connect.shareObject(null);
 					// controllo che la configurazione sia pronta
@@ -1049,7 +1070,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 					// l'oggetto configurazione apposito
 
-					FTPServerConfiguration c = new FTPServerConfiguration();
+					FTPConnectionConfiguration c = new FTPConnectionConfiguration();
 
 					c.setHost(host.getInputValue());
 
@@ -1073,7 +1094,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					if (user.getInputValue() != null) {
 						// ottengo la configurazione
 
-						FTPServerConfiguration conf = connect.getSharedObject();
+						FTPConnectionConfiguration conf = connect.getSharedObject();
 
 						conf.setUsername(user.getInputValue());
 
@@ -1095,7 +1116,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					if (passw.getInputValue() != null) {
 						// ottengo la configurazione
 
-						FTPServerConfiguration conf = connect.getSharedObject();
+						FTPConnectionConfiguration conf = connect.getSharedObject();
 
 						conf.setPassword(passw.getInputValue());
 
