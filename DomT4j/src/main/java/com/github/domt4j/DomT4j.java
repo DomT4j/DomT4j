@@ -782,7 +782,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					} else {
 						markup = instance.currentNode.getMarkup();
 					}
-					return markup;
+					return j£.colors("#start",Color.GREEN)+"\n"+markup+j£.colors("end#",Color.RED);
 				} else {
 					// da definire ...
 					return null;
@@ -937,7 +937,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				// TODO Auto-generated method stub
 				ColorString string = new ColorString();
 				string.append("\n\t\t|Current Phase > ").append(instance.currentPhase.phaseName().toUpperCase(),TerminalColors.PHASE_COLOR).append("\n")
-					  .append("\t\t|Level = ").append(instance.currentPhase.getValue()+"",Color.DEFAULT);
+					  .append("\t\t|Level = ").append(instance.currentPhase.getValue()+"",Color.DEFAULT).append("\n")
+					  .append("\t\t|Accessible = ").append(instance.currentPhase.isAccessible()+"",Color.DEFAULT).append("\n")
+					  .append("\t\t|Satisfied = ").append(instance.currentPhase.isSatisfied()+"",Color.DEFAULT);
 				if (((DefaultPhase)instance.currentPhase).getAccessibilityRule()!=null) {
 					string.append("\n\t\t|Access-Rule = ").append(((DefaultPhase)instance.currentPhase).getAccessibilityRule().ruleExplanation(),Color.DEFAULT);
 				}
@@ -992,9 +994,6 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		
-		
-		
-		
 		// inserisco i comandi nel terminale, quelli generali
 		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand, pathCommand);
 
@@ -1002,138 +1001,14 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// PHASES DEV :
 		//////////////////////////////////////////////////////////////////////////
 
-		Phase creationPhase, migrationPhase;
+		Phase creationPhase, connectionPhase;
 
 		// 1 PHASE : CREATE
 
 		creationPhase = instance.createPhase(1, "creation", "In questa fase si crea e imposta un nodo dom",
 				createCommand);
-
-		// 2 PHASE : MIGRATION
-
-		// commands :
-		final ColorLocalCommand connect, migrate;
-
-		connect = new ColorLocalCommand("connect", "Connection to ftp server");
-
-		migrate = new ColorLocalCommand("migrate", "migrate the document");
-
-		migrate.setExecution(new Execution() {
-
-			@Override
-			public Object exec() {
-				// controllo che ci sia una configurazione pronta
-				if (connect.getSharedObject() != null) {
-					FTPConnectionConfiguration conf = connect.getSharedObject();
-					// cancello l'oggetto condiviso
-					connect.shareObject(null);
-					// controllo che la configurazione sia pronta
-					if (conf.isCompleted()) {
-						System.out.print("Destination URL:");
-						String urlResource = j£._I();
-						System.out.println("Migration in progress ...");
-						// mi connetto al server
-						JjDom.connect(conf.getHost(), conf.getUsername(), conf.getPassword()).migrate(urlResource,
-								instance.currentNode.getDocument());
-					} else {
-						error("The configuration is not complete");
-					}
-				} else {
-					// da definire ...
-				}
-
-				return null;
-			}
-		});
-
-		final Parameter host;
-		final Parameter user;
-		final Parameter passw;
-
-		host = connect.addParam("host", "ftp host");
-		user = connect.addParam("user", "ftp username");
-		passw = connect.addParam("password", "ftp password");
-
-		host.setInputValueExploitable(true);
-		user.setInputValueExploitable(true);
-		passw.setInputValueExploitable(true);
-
-		host.setExecution(new Execution() {
-
-			@Override
-			public Object exec() {
-				// verifico che ci sia il valore da input
-
-				if (host.getInputValue() != null) {
-
-					// okok mi preparo
-
-					// l'oggetto configurazione apposito
-
-					FTPConnectionConfiguration c = new FTPConnectionConfiguration();
-
-					c.setHost(host.getInputValue());
-
-					// condivido l'oggetto
-
-					connect.shareObject(c);
-
-					return setOk("Ftp-Host");
-				}
-
-				return null;
-			}
-		});
-
-		user.setExecution(new Execution() {
-
-			@Override
-			public Object exec() {
-				if (connect.getSharedObject() != null) {
-
-					if (user.getInputValue() != null) {
-						// ottengo la configurazione
-
-						FTPConnectionConfiguration conf = connect.getSharedObject();
-
-						conf.setUsername(user.getInputValue());
-
-						return setOk("Ftp-User");
-					}
-				} else {
-					// da definire ...
-				}
-				return null;
-			}
-		});
-
-		passw.setExecution(new Execution() {
-
-			@Override
-			public Object exec() {
-				if (connect.getSharedObject() != null) {
-
-					if (passw.getInputValue() != null) {
-						// ottengo la configurazione
-
-						FTPConnectionConfiguration conf = connect.getSharedObject();
-
-						conf.setPassword(passw.getInputValue());
-
-						return setOk("Ftp-Passw");
-					}
-				} else {
-					// da definire ...
-				}
-				return null;
-			}
-		});
-
-		migrationPhase = instance.createPhase(2, "migration", "Caricamento di un documento in rete", connect, migrate);
-
-		// mi creo le regole di migration 
 		
-		migrationPhase.accessibleThrough(new Rule() {
+		creationPhase.satisfiableThrough(new Rule() {
 			
 			public boolean verification() {
 				if (instance.currentNode!=null) {
@@ -1151,23 +1026,17 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			
 			public String ruleExplanation() {
 				// TODO Auto-generated method stub
-				return "Accessible if there is a document";
-			}
-		});
-		
-		migrationPhase.satisfiableThrough(new Rule() {
-			
-			public boolean verification() {
-				// DA DEFINIRE ...
-				return false;
-			}
-			
-			public String ruleExplanation() {
-				// TODO Auto-generated method stub
-				return "Satisfied if the migration took place";
+				return "Satisfied if there is a document";
 			}
 		});
 
+		// 2 PHASE : Connection
+		connectionPhase = instance.createPhase(2, "connection", "It is the phase that deals with the following operations: migrate, connect, update",null);
+		
+		// mi creo i comandi di questa fase
+		
+		// Il primo sicuro è il comando che permette di settare l'oggetto connection configuration - ftp - continuare pomeriggio
+		
 	}
 
 	private static void describeNodes(NodeList listNodes) {
