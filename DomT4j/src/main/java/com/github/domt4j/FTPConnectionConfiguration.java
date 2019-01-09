@@ -12,7 +12,7 @@ import cloud.jgo.utils.ColorString;
 import cloud.jgo.utils.command.annotations.CommandClass;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 @XmlRootElement(name="server.config")
-@CommandClass(command="connection", help = "ftp connection config", involveAll=true)
+@CommandClass(command="ftp-connection", help = "ftp connection config", involveAll=true)
 public class FTPConnectionConfiguration implements Config{
 	
 	private String host,username,password ;

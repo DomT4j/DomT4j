@@ -939,7 +939,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				string.append("\n\t\t|Current Phase > ").append(instance.currentPhase.phaseName().toUpperCase(),TerminalColors.PHASE_COLOR).append("\n")
 					  .append("\t\t|Level = ").append(instance.currentPhase.getValue()+"",Color.DEFAULT).append("\n")
 					  .append("\t\t|Accessible = ").append(instance.currentPhase.isAccessible()+"",Color.DEFAULT).append("\n")
-					  .append("\t\t|Satisfied = ").append(instance.currentPhase.isSatisfied()+"",Color.DEFAULT);
+					  .append("\t\t|Satisfied = ").append(instance.currentPhase.isSatisfied()+"",Color.DEFAULT).append("\n")
+					  .append("\t\t|Supported commands = ").append(instance.currentPhase.getCommands()+"",Color.DEFAULT);
 				if (((DefaultPhase)instance.currentPhase).getAccessibilityRule()!=null) {
 					string.append("\n\t\t|Access-Rule = ").append(((DefaultPhase)instance.currentPhase).getAccessibilityRule().ruleExplanation(),Color.DEFAULT);
 				}
@@ -1034,8 +1035,14 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		connectionPhase = instance.createPhase(2, "connection", "It is the phase that deals with the following operations: migrate, connect, update",null);
 		
 		// mi creo i comandi di questa fase
+		ColorLocalCommand ftpConnectionCommand = ColorLocalCommand.getCommandByObject(FTPConnectionConfiguration.class);
 		
-		// Il primo sicuro è il comando che permette di settare l'oggetto connection configuration - ftp - continuare pomeriggio
+		// ...
+		
+		
+		// aggiungo i comandi alla fase connection
+		instance.addCommandsToPhase(connectionPhase, ftpConnectionCommand);
+		
 		
 	}
 
