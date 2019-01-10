@@ -44,7 +44,6 @@ import cloud.jgo.utils.command.execution.Execution;
 import cloud.jgo.utils.command.execution.SharedExecution;
 import cloud.jgo.utils.command.terminal.TerminalColors;
 import cloud.jgo.utils.command.terminal.phase.ColorLocalPhaseTerminal;
-import cloud.jgo.utils.command.terminal.phase.DefaultPhase;
 import cloud.jgo.utils.command.terminal.phase.LocalPhaseTerminal;
 import cloud.jgo.utils.command.terminal.phase.Phase;
 import cloud.jgo.utils.command.terminal.phase.Rule;
@@ -182,7 +181,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// 2 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
 		// 3 comando:status:stampa un resoconto approfondito di una determinata cosa
-		statusCommand = new ColorLocalCommand("status","Displays a report of ... Displays the parameters");
+		statusCommand = new ColorLocalCommand("status","Displays a report of ...");
 		// 4 comando:path
 		pathCommand = new ColorLocalCommand("path","Shows the path of the current node");
 		final ColorLocalCommand globalConfig = new ColorLocalCommand("global-config", "DomT4j Global configuration"); // global-config/domt4j.xml
@@ -941,11 +940,11 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					  .append("\t\t|Accessible = ").append(instance.currentPhase.isAccessible()+"",Color.DEFAULT).append("\n")
 					  .append("\t\t|Satisfied = ").append(instance.currentPhase.isSatisfied()+"",Color.DEFAULT).append("\n")
 					  .append("\t\t|Supported commands = ").append(instance.currentPhase.getCommands()+"",Color.DEFAULT);
-				if (((DefaultPhase)instance.currentPhase).getAccessibilityRule()!=null) {
-					string.append("\n\t\t|Access-Rule = ").append(((DefaultPhase)instance.currentPhase).getAccessibilityRule().ruleExplanation(),Color.DEFAULT);
+				if ((instance.currentPhase).getAccessibilityRule()!=null) {
+					string.append("\n\t\t|Access-Rule = ").append((instance.currentPhase).getAccessibilityRule().ruleExplanation(),Color.DEFAULT);
 				}
-				if (((DefaultPhase)instance.currentPhase).getSatisfiabilityRule()!=null) {
-					string.append("\n\t\t|Satisfaction-Rule = ").append(((DefaultPhase)instance.currentPhase).getSatisfiabilityRule().ruleExplanation(),Color.DEFAULT);
+				if ((instance.currentPhase).getSatisfiabilityRule()!=null) {
+					string.append("\n\t\t|Satisfaction-Rule = ").append((instance.currentPhase).getSatisfiabilityRule().ruleExplanation(),Color.DEFAULT);
 				}
 				string.append("\n");
 				return string.toString() ;	   
