@@ -42,6 +42,7 @@ import cloud.jgo.utils.command.Sharer;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 import cloud.jgo.utils.command.execution.Execution;
 import cloud.jgo.utils.command.execution.SharedExecution;
+import cloud.jgo.utils.command.execution.Executable.When;
 import cloud.jgo.utils.command.terminal.TerminalColors;
 import cloud.jgo.utils.command.terminal.phase.ColorLocalPhaseTerminal;
 import cloud.jgo.utils.command.terminal.phase.LocalPhaseTerminal;
@@ -171,19 +172,23 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// imposto JjDom in modo tale che si adatti a un documento HTML colorato a
 		// livello di sintassi:
 		JjDom.documentTypeUsed = HTMLColorDocument.class;
+		// qui imposto il titolo del terminale vero e proprio tramite questa istruzione
+		£.execConnectingOutputChannel("title DomT4j(@)"); // provvisoria - testare su linux
 		final ColorLocalCommand createCommand;
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, statusCommand, pathCommand;
+		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, statusCommand, pathCommand, clsCommand;
 		// 1 comando : create
-		createCommand = new ColorLocalCommand("create", "This command creates a node");
+		createCommand = new ColorLocalCommand("node", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
 		// 3 comando:status:stampa un resoconto approfondito di una determinata cosa
 		statusCommand = new ColorLocalCommand("status","Displays a report of ...");
 		// 4 comando:path
 		pathCommand = new ColorLocalCommand("path","Shows the path of the current node");
+		// 5 comando:cls
+		clsCommand = new ColorLocalCommand("cls","clean the output");
 		final ColorLocalCommand globalConfig = new ColorLocalCommand("global-config", "DomT4j Global configuration"); // global-config/domt4j.xml
 		final ColorLocalCommand config = new ColorLocalCommand("config","DomT4j configuration"); // global-config/config/domt4j.xml
 		// params :
@@ -994,8 +999,18 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 			}
 		});
 		
+		// CLS COMMAND : PARAMETERS
+		clsCommand.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+			instance.cleanTerminal();
+			return null ;
+			}
+		});
+		
 		// inserisco i comandi nel terminale, quelli generali
-		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand, pathCommand);
+		instance.addCommands(cdCommand, lsCommand, markupCommand, previewCommand, setCommand, exitCommand, helpsCommand, globalConfig, config, statusCommand, pathCommand, clsCommand);
 
 		//////////////////////////////////////////////////////////////////////////
 		// PHASES DEV :
@@ -1007,6 +1022,9 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 		creationPhase = instance.createPhase(1, "creation", "In questa fase si crea e imposta un nodo dom",
 				createCommand);
+		// questa fase non deve essere eseguita
+		
+		creationPhase.validExecution(When.NEVER);
 		
 		creationPhase.satisfiableThrough(new Rule() {
 			
@@ -1031,18 +1049,51 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		});
 
 		// 2 PHASE : Connection
-		connectionPhase = instance.createPhase(2, "connection", "It is the phase that deals with the following operations: migrate, connect, update",null);
+		connectionPhase = instance.createPhase(2, "connection", "It is the phase that deals with the following operations: migrate, connect, update");
+		// qui poi mi servirà una sorta di configurazione HTTP,FTPS ecc ecc
+		ColorLocalCommand connect, migrate, download, update;
+		final ColorLocalCommand ftpConnectionCommand;
 		
-		// mi creo i comandi di questa fase
-		ColorLocalCommand ftpConnectionCommand = ColorLocalCommand.getCommandByObject(FTPConnectionConfiguration.class);
-		
-		// ...
-		
-		
+		// i comandi della fase connection
+		ftpConnectionCommand = ColorLocalCommand.getCommandByObject(FTPConnectionConfiguration.class);
+		// per eseguire questi comandi bisogna portare a termine l'oggetto configurazione ftp condiviso tramite il comando qui sopra
+		connect = new ColorLocalCommand("connect","Connection to the server");
+		migrate = new ColorLocalCommand("migrate","Document migration");
+		download = new ColorLocalCommand("download","Document download");
+		update = new ColorLocalCommand("update","Document update");
+		// executions:
+		connect.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				// qui controllo che ci sia un ogggetto condiviso
+				// sul comando ftpConnection
+				
+				if (ftpConnectionCommand.getSharedObject()!=null) {
+					
+					FTPConnectionConfiguration confFtp = new FTPConnectionConfiguration();
+					if (confFtp.getHost()!=null && confFtp.getUsername()!=null && confFtp.getPassword()!=null) {
+						
+						// okok mi connetto al server
+						
+						JjDom.connect(confFtp.getHost(), confFtp.getUsername(), confFtp.getPassword());
+					
+						// controllo la connessione 
+						
+						if (JjDom.isConnected())return positiveMsg("Successfully connected to the server");
+						else return error("Connection failed");
+					}
+					else {
+						return "The configuration is not complete #";
+					}
+				}
+				else {
+					return error("Connection not set");
+				}
+			}
+		});
 		// aggiungo i comandi alla fase connection
-		instance.addCommandsToPhase(connectionPhase, ftpConnectionCommand);
-		
-		
+		instance.addCommandsToPhase(connectionPhase, ftpConnectionCommand, connect, migrate, download, update);
 	}
 
 	private static void describeNodes(NodeList listNodes) {

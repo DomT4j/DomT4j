@@ -5,6 +5,9 @@ public class DomT4jTest {
 public static void main(String[] args) {
 	
 	
+	// Primo passo : devo adattare il comando status, tenendo conto di jGo
+	// per esempio voglio poter settare un oggetto ftpConfiguration globale
+	// in modo tale da migrare/aggiornare senza dover specificare dati
 	// prossimo passo : gestire la multi utenza, in attesa che si risolva in jGo 1.0.9
 	// la feature che ci permette di condividere oggetti creando parametri automatici
 	// in base ai campi dell'oggetto condiviso, questo approccio non lo utilizzeremo però
