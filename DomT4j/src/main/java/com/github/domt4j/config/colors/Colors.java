@@ -1,7 +1,7 @@
 package com.github.domt4j.config.colors;
 
-import com.github.domt4j.config.Config;
+import cloud.jgo.utils.command.annotations.Configurable;
 
 public interface Colors {
-	public abstract Config getConfigByTarget(String target);
+	public abstract Configurable getConfigByTarget(String target);
 }

@@ -8,10 +8,10 @@ import javax.xml.bind.annotation.XmlElements;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import com.github.domt4j.config.Config;
+import cloud.jgo.utils.command.annotations.Configurable;
 
 @XmlRootElement(name = "colors.config")
-public class ColorsConfig implements Colors, Config {
+public class ColorsConfig implements Colors, Configurable {
 	@XmlElement(name = "color.config")
 	public List<ColorConfig> colorConfig;
 
@@ -19,8 +19,8 @@ public class ColorsConfig implements Colors, Config {
 		this.colorConfig = new ArrayList<ColorConfig>();
 	}
 
-	public Config getConfigByTarget(String target) {
-		Config config = null;
+	public Configurable getConfigByTarget(String target) {
+		Configurable config = null;
 		for (ColorConfig conf : colorConfig) {
 			if (conf.getTarget().equals(target)) {
 				config = conf;
@@ -38,5 +38,10 @@ public class ColorsConfig implements Colors, Config {
 	public boolean isCompleted() {
 		// TODO Auto-generated method stub
 		return false; // da definire ...
+	}
+
+	public Class<? extends Configurable> getTargetType() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

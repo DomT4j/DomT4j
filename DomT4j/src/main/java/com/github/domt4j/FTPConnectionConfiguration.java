@@ -5,23 +5,17 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.fusesource.jansi.Ansi.Color;
 
-import com.github.domt4j.config.Config;
-
 import cloud.jgo.j£;
 import cloud.jgo.utils.ColorString;
 import cloud.jgo.utils.command.annotations.CommandClass;
+import cloud.jgo.utils.command.annotations.Configurable;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 
 @XmlRootElement(name = "server.config")
-@CommandClass(command = "ftp-connection", help = "ftp connection config", involveAll = true)
-public class FTPConnectionConfiguration implements Config {
+@CommandClass(command = "ftp-connection", help = "ftp connection config", involveAllFields = true)
+public class FTPConnectionConfiguration implements Configurable {
 
 	private String host, username, password;
-	
-	public String getTarget() {
-		// TODO Auto-generated method stub
-		return "ftp_server";
-	}
 
 	public FTPConnectionConfiguration() {
 		this.host = null;
@@ -85,8 +79,19 @@ public class FTPConnectionConfiguration implements Config {
 	}
 
 	public boolean isCompleted() {
-		if (this.host!=null&&this.username!=null&&this.password!=null)return true ;
-		else return false ;
+		if (this.host != null && this.username != null && this.password != null)
+			return true;
+		else
+			return false;
 	}
 
+	public Class<? extends Configurable> getTargetType() {
+		// TODO Auto-generated method stub
+		return getClass();
+	}
+
+	public String getTarget() {
+		// TODO Auto-generated method stub
+		return "ftp_server";
+	}
 }

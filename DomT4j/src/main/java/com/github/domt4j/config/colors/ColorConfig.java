@@ -5,10 +5,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.fusesource.jansi.Ansi.Color;
 
-import com.github.domt4j.config.Config;
+import cloud.jgo.utils.command.annotations.Configurable;
 
 @XmlRootElement(name = "color.config")
-public class ColorConfig implements Config {
+public class ColorConfig implements Configurable {
 
 	@XmlElement
 	public Color color;
@@ -32,7 +32,12 @@ public class ColorConfig implements Config {
 
 	public boolean isCompleted() {
 		// TODO Auto-generated method stub
-		return false ; // da definire ...
+		return false; // da definire ...
+	}
+
+	public Class<? extends Configurable> getTargetType() {
+		// TODO Auto-generated method stub
+		return getClass();
 	}
 
 }

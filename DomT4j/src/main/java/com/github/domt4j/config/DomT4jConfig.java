@@ -5,8 +5,10 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import com.github.domt4j.config.colors.ColorsConfig;
 
+import cloud.jgo.utils.command.annotations.Configurable;
+
 @XmlRootElement(name = "DomT4j.config")
-public class DomT4jConfig implements Config {
+public class DomT4jConfig implements Configurable {
 
 	public DomT4jConfig() {
 		this.colorsConfiguration = new ColorsConfig();
@@ -35,6 +37,11 @@ public class DomT4jConfig implements Config {
 	public boolean isCompleted() {
 		// TODO Auto-generated method stub
 		return false ; // da definire ...
+	}
+
+	public Class<? extends Configurable> getTargetType() {
+		// TODO Auto-generated method stub
+		return getClass();
 	}
 
 }

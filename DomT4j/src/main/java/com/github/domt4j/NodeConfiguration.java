@@ -2,13 +2,12 @@ package com.github.domt4j;
 
 import org.fusesource.jansi.Ansi.Color;
 
-import com.github.domt4j.config.Config;
-
 import cloud.jgo.utils.command.annotations.CommandClass;
+import cloud.jgo.utils.command.annotations.Configurable;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 
-@CommandClass(command = "Node", help = "This command cretes a node", involveAll = true)
-public class NodeConfiguration implements Config {
+@CommandClass(command = "Node", help = "This command cretes a node", involveAllFields = true)
+public class NodeConfiguration implements cloud.jgo.utils.command.annotations.Configurable {
 
 	// Provvisoria, può contenere bugs
 	private String nodeName;
@@ -106,15 +105,6 @@ public class NodeConfiguration implements Config {
 		this.append = append;
 	}
 
-	public boolean isCompleted() {
-		return this.completed;
-	}
-
-	public String getTarget() {
-		// TODO Auto-generated method stub
-		return "node";
-	}
-
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
@@ -129,6 +119,21 @@ public class NodeConfiguration implements Config {
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	public String getTarget() {
+		// TODO Auto-generated method stub
+		return "Node";
+	}
+
+	public Class<? extends Configurable> getTargetType() {
+		// TODO Auto-generated method stub
+		return getClass();
+	}
+
+	public boolean isCompleted() {
+		// TODO Auto-generated method stub
+		return this.completed;
 	}
 
 }
