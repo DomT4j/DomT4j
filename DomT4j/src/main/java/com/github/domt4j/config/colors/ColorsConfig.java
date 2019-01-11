@@ -10,22 +10,21 @@ import javax.xml.bind.annotation.XmlType;
 
 import com.github.domt4j.config.Config;
 
-@XmlRootElement(name="colors.config")
-public class ColorsConfig implements Config,Colors{
-
-	@XmlElement(name="color.config")
-	public
-	List<ColorConfig> colorConfig;
+@XmlRootElement(name = "colors.config")
+public class ColorsConfig implements Colors, Config {
+	@XmlElement(name = "color.config")
+	public List<ColorConfig> colorConfig;
 
 	public ColorsConfig() {
-		// TODO Auto-generated constructor stub
 		this.colorConfig = new ArrayList<ColorConfig>();
 	}
+
 	public Config getConfigByTarget(String target) {
-		Config config = null ;
-		for (ColorConfig conf: colorConfig) {
+		Config config = null;
+		for (ColorConfig conf : colorConfig) {
 			if (conf.getTarget().equals(target)) {
-				config = conf ;break;
+				config = conf;
+				break;
 			}
 		}
 		return config;
@@ -35,9 +34,9 @@ public class ColorsConfig implements Config,Colors{
 		// TODO Auto-generated method stub
 		return "colors";
 	}
+
 	public boolean isCompleted() {
 		// TODO Auto-generated method stub
-		return true;
+		return false; // da definire ...
 	}
-
 }

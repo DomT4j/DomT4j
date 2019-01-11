@@ -6,32 +6,33 @@ import com.github.domt4j.config.Config;
 
 import cloud.jgo.utils.command.annotations.CommandClass;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
-@CommandClass(command="Node",help = "This command cretes a node", involveAll=true)
-public class NodeConfiguration implements Config{
-	
+
+@CommandClass(command = "Node", help = "This command cretes a node", involveAll = true)
+public class NodeConfiguration implements Config {
+
 	// Provvisoria, può contenere bugs
-	private String nodeName ;
+	private String nodeName;
 	private String nodeValue;
-	private String nodeType ;
+	private String nodeType;
 	private String rootElementName; // valido per xml
 	private String append;
-	private String documentType ;
-	private String attribute ;
-	private boolean completed ;
-	final static String[]documentTypes= {"html","xml"};
-	final static String[]nodeTypes = {"document","element","comment"};
+	private String documentType;
+	private String attribute;
+	private boolean completed;
+	final static String[] documentTypes = { "html", "xml" };
+	final static String[] nodeTypes = { "document", "element", "comment" };
+
 	public NodeConfiguration() {
-		// TODO Auto-generated constructor stub
-		this.nodeName = null ;
-		this.nodeValue = null ;
-		this.nodeType = null ;
-		this.append = null ;
-		this.rootElementName = null ;
-		this.documentType = null ;
-		this.attribute = null ;
-		this.completed = false ;
+		this.nodeName = null;
+		this.nodeValue = null;
+		this.nodeType = null;
+		this.append = null;
+		this.rootElementName = null;
+		this.documentType = null;
+		this.attribute = null;
+		this.completed = false;
 	}
-	
+
 	public String getAttribute() {
 		return attribute;
 	}
@@ -43,15 +44,15 @@ public class NodeConfiguration implements Config{
 	public String getDocumentType() {
 		return documentType;
 	}
-	
+
 	public boolean setDocumentType(String documentType) {
-		if (documentType.equals(documentTypes[0])||documentType.equals(documentTypes[1])) {
+		if (documentType.equals(documentTypes[0]) || documentType.equals(documentTypes[1])) {
 			this.documentType = documentType;
-			if (this.getNodeType().equals("document")&&documentType!=null) {
-				this.completed = true ;
+			if (this.getNodeType().equals("document") && documentType != null) {
+				this.completed = true;
 			}
 		}
-		return this.completed ;
+		return this.completed;
 	}
 
 	public String getNodeName() {
@@ -60,8 +61,8 @@ public class NodeConfiguration implements Config{
 
 	public void setNodeName(String nodeName) {
 		this.nodeName = nodeName;
-		if (this.nodeType.equals("element")&&nodeName!=null) {
-			this.completed = true ;
+		if (this.nodeType.equals("element") && nodeName != null) {
+			this.completed = true;
 		}
 	}
 
@@ -71,8 +72,8 @@ public class NodeConfiguration implements Config{
 
 	public void setNodeValue(String nodeValue) {
 		this.nodeValue = nodeValue;
-		if (this.nodeType.equals("comment")&&nodeValue!=null) {
-			this.completed = true ;
+		if (this.nodeType.equals("comment") && nodeValue != null) {
+			this.completed = true;
 		}
 	}
 
@@ -81,12 +82,11 @@ public class NodeConfiguration implements Config{
 	}
 
 	public boolean setNodeType(String nodeType) {
-		if (nodeType.equals("document")||nodeType.equals("element")||nodeType.equals("comment")) {
+		if (nodeType.equals("document") || nodeType.equals("element") || nodeType.equals("comment")) {
 			this.nodeType = nodeType;
-			return true ;
-		}
-		else {
-			return false ;
+			return true;
+		} else {
+			return false;
 		}
 	}
 
@@ -107,20 +107,20 @@ public class NodeConfiguration implements Config{
 	}
 
 	public boolean isCompleted() {
-		return this.completed ;
+		return this.completed;
 	}
 
 	public String getTarget() {
 		// TODO Auto-generated method stub
 		return "node";
 	}
-	
+
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		String result = null ;
+		String result = null;
 		try {
-			result =  ColorLocalCommand.toString(this,Color.DEFAULT,Color.CYAN);
+			result = ColorLocalCommand.toString(this, Color.DEFAULT, Color.CYAN);
 		} catch (IllegalArgumentException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,7 +128,7 @@ public class NodeConfiguration implements Config{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return result ;
+		return result;
 	}
 
 }

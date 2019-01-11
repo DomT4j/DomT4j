@@ -8,6 +8,13 @@ import com.github.domt4j.config.colors.ColorsConfig;
 @XmlRootElement(name = "DomT4j.config")
 public class DomT4jConfig implements Config {
 
+	public DomT4jConfig() {
+		this.colorsConfiguration = new ColorsConfig();
+		this.terminalName = null;
+		this.phaseVisible = true;
+		this.firstPhaseVisible = true;
+	}
+
 	// 1 elemento : colors.config
 	@XmlElement(name = "colors.config")
 	public ColorsConfig colorsConfiguration;
@@ -20,14 +27,6 @@ public class DomT4jConfig implements Config {
 	@XmlElement(name = "first.phase.visible")
 	public boolean firstPhaseVisible;
 
-	public DomT4jConfig() {
-		// TODO Auto-generated constructor stub
-		this.colorsConfiguration = new ColorsConfig();
-		this.terminalName = null;
-		this.phaseVisible = true;
-		this.firstPhaseVisible = true ;
-	}
-
 	public String getTarget() {
 		// TODO Auto-generated method stub
 		return "global";
@@ -35,7 +34,7 @@ public class DomT4jConfig implements Config {
 
 	public boolean isCompleted() {
 		// TODO Auto-generated method stub
-		return true;
+		return false ; // da definire ...
 	}
 
 }

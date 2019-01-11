@@ -65,6 +65,14 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 	public DomT4jConfig getConfiguration() {
 		return this.configuration;
 	}
+	
+	public static String confComplete() {
+		return j£.colors("Config Object:",Color.DEFAULT)+j£.colors("complete",Color.GREEN);
+	}
+	
+	public static String phaseSatisfied() {
+		return j£.colors("Phase:",Color.DEFAULT)+j£.colors("satisfied",Color.GREEN);
+	}
 
 	public static DomT4j getDomTerminal() {
 		if (instance == null) {
@@ -81,6 +89,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		/*
 		 * Config XML from HERE To §
 		 */
+		instance.cleanTerminal();
 		if (GLOBAL_CONF_DIR.exists()) {
 
 			// verifico se esiste il file di config
@@ -236,13 +245,17 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 					if (documentTypeInput.equals("html")) {
 						JjDom.newDocument().setMinimalTags().useDoctype(true).home().jqueryInit();
 						instance.currentNode = JjDom.document;
-						return positiveMsg("Document " + j£.colors("HTML", Color.CYAN) + " is created");
+						return positiveMsg("Document " + j£.colors("HTML", Color.CYAN) + " is created")+"\n"+
+								confComplete()+"\n"+
+								phaseSatisfied();
 					} else if (documentTypeInput.equals("xml")) {
 						// chiedo il nome dell'elemento root
 						System.out.print("Root element name:");
 						String rootElementName = £._I();
 						instance.currentNode = new XMLColorDocument(Document.CHARSET_UTF_8, null, rootElementName);
-						return positiveMsg("Document " + j£.colors("XML", Color.CYAN) + " is created");
+						return positiveMsg("Document " + j£.colors("XML", Color.CYAN) + " is created")+"\n"+
+							   confComplete()+"\n"+
+								phaseSatisfied();
 					} else {
 						return error("Document type is not valid - Available types= xml|html");
 					}
@@ -1071,8 +1084,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				
 				if (ftpConnectionCommand.getSharedObject()!=null) {
 					
-					FTPConnectionConfiguration confFtp = new FTPConnectionConfiguration();
-					if (confFtp.getHost()!=null && confFtp.getUsername()!=null && confFtp.getPassword()!=null) {
+					FTPConnectionConfiguration confFtp = ftpConnectionCommand.getSharedObject();
+					if (confFtp.isCompleted()) {
 						
 						// okok mi connetto al server
 						
