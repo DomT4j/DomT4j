@@ -7,7 +7,6 @@ public static void main(String[] args) {
 	// Primissimo passo : voglio che quando viene condiviso un qualsiasi oggetto
 	// quando i campi necessari vengono soddisfatti, dobbiamo comunicarlo all'utente
 	// cosi da fargli splendere gli occhi
-	// Primo passo : devo adattare il comando status, tenendo conto di jGo
 	// per esempio voglio poter settare un oggetto ftpConfiguration globale
 	// in modo tale da migrare/aggiornare senza dover specificare dati
 	// prossimo passo : gestire la multi utenza, in attesa che si risolva in jGo 1.0.9

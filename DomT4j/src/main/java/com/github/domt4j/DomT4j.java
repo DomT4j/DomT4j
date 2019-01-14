@@ -178,14 +178,12 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, statusCommand,
+		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand,
 				pathCommand, clsCommand;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("node", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
 		setCommand = new ColorLocalCommand("set", "\"This command sets\"");
-		// 3 comando:status:stampa un resoconto approfondito di una determinata cosa
-		statusCommand = new ColorLocalCommand("status", "Displays a report of ...");
 		// 4 comando:path
 		pathCommand = new ColorLocalCommand("path", "Shows the path of the current node");
 		// 5 comando:cls
@@ -941,42 +939,8 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final Parameter phase = statusCommand.addParam("phase", "current phase");
 		final Parameter p = statusCommand.addParam("p", "current phase");
 
-		// status exec
-
-		statusCommand.setExecution(new Execution() {
-			@Override
-			public Object exec() {
-
-				return phase.execute() + "\n" + node.execute();
-
-			}
-		});
-		phase.setExecution(new Execution() { // provvisorio, controllare se la fase corrente esiste
-			@Override
-			public Object exec() {
-				// TODO Auto-generated method stub
-				ColorString string = new ColorString();
-				string.append("\n\t\t|Current Phase > ")
-						.append(instance.currentPhase.phaseName().toUpperCase(), TerminalColors.PHASE_COLOR)
-						.append("\n").append("\t\t|Level = ")
-						.append(instance.currentPhase.getValue() + "", Color.DEFAULT).append("\n")
-						.append("\t\t|Accessible = ").append(instance.currentPhase.isAccessible() + "", Color.DEFAULT)
-						.append("\n").append("\t\t|Satisfied = ")
-						.append(instance.currentPhase.isSatisfied() + "", Color.DEFAULT).append("\n")
-						.append("\t\t|Supported commands = ")
-						.append(instance.currentPhase.getCommands() + "", Color.DEFAULT);
-				if ((instance.currentPhase).getAccessibilityRule() != null) {
-					string.append("\n\t\t|Access-Rule = ")
-							.append((instance.currentPhase).getAccessibilityRule().ruleExplanation(), Color.DEFAULT);
-				}
-				if ((instance.currentPhase).getSatisfiabilityRule() != null) {
-					string.append("\n\t\t|Satisfaction-Rule = ")
-							.append((instance.currentPhase).getSatisfiabilityRule().ruleExplanation(), Color.DEFAULT);
-				}
-				string.append("\n");
-				return string.toString();
-			}
-		});
+		// status params executions
+		phase.setExecution(statusCommand.getExecution());
 		node.setExecution(new Execution() {
 
 			@Override
@@ -1075,7 +1039,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand ftpConnectionCommand;
 
 		// i comandi della fase connection
-		ftpConnectionCommand = ColorLocalCommand.getCommandByObject(FTPConnectionConfiguration.class);
+		ftpConnectionCommand = ColorLocalCommand.getCommandByType(FTPConnectionConfiguration.class);
 		// per eseguire questi comandi bisogna portare a termine l'oggetto
 		// configurazione ftp condiviso tramite il comando qui sopra
 		connect = new ColorLocalCommand("connect", "Connection to the server");
