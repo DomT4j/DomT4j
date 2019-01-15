@@ -1001,7 +1001,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// PHASES DEV :
 		//////////////////////////////////////////////////////////////////////////
 
-		Phase creationPhase, connectionPhase;
+		Phase creationPhase;
 
 		// 1 PHASE : CREATE
 
@@ -1010,75 +1010,147 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		// questa fase non deve essere eseguita
 
 		creationPhase.validExecution(When.NEVER);
-
-		creationPhase.satisfiableThrough(new Rule() {
-
+		// Fasi per la migrazione e il reperimento online di un documento
+		Phase connection, migration, download, update ;
+		
+		connection = instance.createPhase(2, "connection", "connection phase");
+		migration = instance.createPhase(3, "migration", "migration phase");
+		download = instance.createPhase(4, "download", "download phase");
+		update = instance.createPhase(5, "update", "update phase");
+		
+		// RULES delle fasi
+		
+		migration.accessibleThrough(new Rule() {
+			
 			public boolean verification() {
-				if (instance.currentNode != null) {
-					if (instance.currentNode.getDocument() != null) {
-						return true;
-					} else {
-						return false;
+				if (instance.currentNode!=null) {
+					if (instance.currentNode.getDocument()!=null) {
+						return true ;
 					}
-				} else {
-					return false;
+					else {
+						return false ;
+					}
+				}
+				else {
+					return false ;
 				}
 			}
-
+			
 			public String ruleExplanation() {
 				// TODO Auto-generated method stub
-				return "Satisfied if there is a document";
+				return "The document must be set";
 			}
 		});
-
-		// 2 PHASE : Connection
-		connectionPhase = instance.createPhase(2, "connection",
-				"It is the phase that deals with the following operations: migrate, connect, update");
-		// qui poi mi servirà una sorta di configurazione HTTP,FTPS ecc ecc
-		ColorLocalCommand connect, migrate, download, update;
-		final ColorLocalCommand ftpConnectionCommand;
-
-		// i comandi della fase connection
-		ftpConnectionCommand = ColorLocalCommand.getCommandByType(FTPConnectionConfiguration.class);
-		// per eseguire questi comandi bisogna portare a termine l'oggetto
-		// configurazione ftp condiviso tramite il comando qui sopra
-		connect = new ColorLocalCommand("connect", "Connection to the server");
-		migrate = new ColorLocalCommand("migrate", "Document migration");
-		download = new ColorLocalCommand("download", "Document download");
-		update = new ColorLocalCommand("update", "Document update");
-		// executions:
+		
+		// 	COMANDI delle fasi
+		
+		// comandi -  Connection Phase
+		
+		ColorLocalCommand connect ;
+		final ColorLocalCommand ftp_connection;
+		connect = new ColorLocalCommand("connect","Connects to the server");
+		ftp_connection = ColorLocalCommand.getCommandByType(FTPConnectionConfiguration.class);
 		connect.setExecution(new Execution() {
-
+			
 			@Override
 			public Object exec() {
-				// qui controllo che ci sia un ogggetto condiviso
-				// sul comando ftpConnection
-
-				if (ftpConnectionCommand.getSharedObject() != null) {
-
-					FTPConnectionConfiguration confFtp = ftpConnectionCommand.getSharedObject();
-					if (confFtp.isCompleted()) {
-
-						// okok mi connetto al server
-
-						JjDom.connect(confFtp.getHost(), confFtp.getUsername(), confFtp.getPassword());
-
-						// controllo la connessione
-
-						if (JjDom.isConnected())
-							return positiveMsg("Successfully connected to the server");
-						else
+				if (ftp_connection.getSharedObject()!=null) {
+					FTPConnectionConfiguration c = ftp_connection.getSharedObject();
+					if (c.isCompleted()) {
+						if (JjDom.isConnected()) {
+							JjDom.closeConnection();
+						}
+						JjDom.connect(c.getHost(), c.getUsername(), c.getPassword());
+						if (JjDom.isConnected()) {
+							return positiveMsg("Successfully connected");
+						}
+						else {
 							return error("Connection failed");
-					} else {
-						return "The configuration is not complete #";
+						}
 					}
-				} else {
-					return error("Connection not set");
+					else {
+						return error("The configuration is not complete");
+					}
+				}
+				else if(instance.configuration.ftp_conn!=null) {
+					if (instance.configuration.ftp_conn.isCompleted()) {
+						if (JjDom.isConnected()) {
+							JjDom.closeConnection();
+						}
+						JjDom.connect(instance.configuration.ftp_conn.getHost(), instance.configuration.ftp_conn.getUsername(), instance.configuration.ftp_conn.getPassword());
+						if (JjDom.isConnected()) {
+							return positiveMsg("Successfully connected");
+						}
+						else {
+							return error("Connection failed");
+						}
+					}
+					else {
+						return error("The configuration is not complete");
+					}
+				}
+				else {
+					return error("No connection set");
 				}
 			}
 		});
-		// aggiungo i comandi alla fase connection
-		instance.addCommandsToPhase(connectionPhase, ftpConnectionCommand, connect, migrate, download, update);
+		
+		instance.addCommandsToPhase(connection, ftp_connection, connect);
+		
+		// comandi Migration Phase :
+		
+		final ColorLocalCommand migrate = new ColorLocalCommand("migrate","Migrate the document to the server");
+		
+		migrate.setExecution(new Execution() {
+			
+			@Override
+			public Object exec() {
+				if (ftp_connection.getSharedObject()!=null) {
+					FTPConnectionConfiguration c = ftp_connection.getSharedObject();
+					if (c.isCompleted()) {
+						if (JjDom.isConnected()) {
+							if (c.getUrlResource()==null) {
+								System.out.print("Url-Resource:");
+								String urlResource = £._I();
+								c.setUrlResource(urlResource);
+							}
+							JjDom.migrate(c.getUrlResource(), instance.currentNode.getDocument());
+							return null ;
+						}
+						else {
+							return error("No connection");
+						}
+					}
+					else {
+						return error("The configuration is not complete");
+					}
+				}
+				else if(instance.configuration.ftp_conn!=null) {
+					if (instance.configuration.ftp_conn.isCompleted()) {
+						if (JjDom.isConnected()) {
+							if (instance.configuration.ftp_conn.getUrlResource()==null) {
+								System.out.print("Url-Resource:");
+								String urlResource = £._I();
+								instance.configuration.ftp_conn.setUrlResource(urlResource);
+							}
+							JjDom.migrate(instance.configuration.ftp_conn.getUrlResource(), instance.currentNode.getDocument());
+							return null ;
+						}
+						else {
+							return error("No connection");
+						}
+					}
+					else {
+						return error("The configuration is not complete");
+					}
+				}
+				else {
+					return error("No connection set");
+				}
+			}
+		});
+		
+		instance.addCommandsToPhase(migration, migrate);
 	}
 
 	private static void describeNodes(NodeList listNodes) {

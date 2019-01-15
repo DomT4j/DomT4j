@@ -9,18 +9,20 @@ import cloud.jgo.j£;
 import cloud.jgo.utils.ColorString;
 import cloud.jgo.utils.command.annotations.CommandClass;
 import cloud.jgo.utils.command.annotations.Configurable;
+import cloud.jgo.utils.command.annotations.ParameterMethod;
 import cloud.jgo.utils.command.color.ColorLocalCommand;
 
-@XmlRootElement(name = "server.config")
+@XmlRootElement(name = "ftp-connection.config")
 @CommandClass(command = "ftp-connection", help = "ftp connection config", involveAllFields = true)
 public class FTPConnectionConfiguration implements Configurable {
 
-	private String host, username, password;
+	private String host, username, password, urlResource;
 
 	public FTPConnectionConfiguration() {
 		this.host = null;
 		this.username = null;
 		this.password = null;
+		this.urlResource = null ;
 	}
 
 	@XmlElement
@@ -84,12 +86,21 @@ public class FTPConnectionConfiguration implements Configurable {
 		else
 			return false;
 	}
+	@XmlElement
+	public String getUrlResource() {
+		return urlResource;
+	}
 
+	public void setUrlResource(String urlResource) {
+		this.urlResource = urlResource;
+	}
+
+	@ParameterMethod(help = "Target type")
 	public Class<? extends Configurable> getTargetType() {
 		// TODO Auto-generated method stub
 		return getClass();
 	}
-
+	@ParameterMethod(help = "FTP-Server")
 	public String getTarget() {
 		// TODO Auto-generated method stub
 		return "ftp_server";

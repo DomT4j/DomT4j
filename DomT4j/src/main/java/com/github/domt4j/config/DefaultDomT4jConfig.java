@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.fusesource.jansi.Ansi.Color;
 
+import com.github.domt4j.FTPConnectionConfiguration;
 import com.github.domt4j.config.colors.ColorConfig;
 
 public class DefaultDomT4jConfig extends DomT4jConfig{

@@ -3,20 +3,14 @@ package com.github.domt4j.config;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.github.domt4j.FTPConnectionConfiguration;
 import com.github.domt4j.config.colors.ColorsConfig;
 
 import cloud.jgo.utils.command.annotations.Configurable;
 
 @XmlRootElement(name = "DomT4j.config")
 public class DomT4jConfig implements Configurable {
-
-	public DomT4jConfig() {
-		this.colorsConfiguration = new ColorsConfig();
-		this.terminalName = null;
-		this.phaseVisible = true;
-		this.firstPhaseVisible = true;
-	}
-
+	
 	// 1 elemento : colors.config
 	@XmlElement(name = "colors.config")
 	public ColorsConfig colorsConfiguration;
@@ -28,6 +22,16 @@ public class DomT4jConfig implements Configurable {
 	public boolean phaseVisible;
 	@XmlElement(name = "first.phase.visible")
 	public boolean firstPhaseVisible;
+	@XmlElement(name = "ftp-connection.config")
+	public FTPConnectionConfiguration ftp_conn;
+
+	public DomT4jConfig() {
+		this.colorsConfiguration = new ColorsConfig();
+		this.terminalName = null;
+		this.phaseVisible = true;
+		this.firstPhaseVisible = true;
+		this.ftp_conn = null ;
+	}
 
 	public String getTarget() {
 		// TODO Auto-generated method stub
