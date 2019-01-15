@@ -57,7 +57,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 	// campi della classe
 
-	private Node currentNode = null;
+	Node currentNode = null;
 
 	private DomT4jConfig configuration = null;
 
@@ -178,8 +178,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		final ColorLocalCommand cdCommand;
 		ColorLocalCommand lsCommand;
 		final ColorLocalCommand setCommand;
-		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand,
-				pathCommand, clsCommand;
+		ColorLocalCommand getCommand, markupCommand, previewCommand, exitCommand, helpsCommand, pathCommand, clsCommand;
 		// 1 comando : create
 		createCommand = new ColorLocalCommand("node", "This command creates a node");
 		// 2 comando:set:imposta valori del nodo
@@ -1011,50 +1010,48 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 
 		creationPhase.validExecution(When.NEVER);
 		// Fasi per la migrazione e il reperimento online di un documento
-		Phase connection, migration, download, update ;
-		
+		Phase connection, migration, download, update;
+
 		connection = instance.createPhase(2, "connection", "connection phase");
 		migration = instance.createPhase(3, "migration", "migration phase");
 		download = instance.createPhase(4, "download", "download phase");
 		update = instance.createPhase(5, "update", "update phase");
-		
+
 		// RULES delle fasi
-		
+
 		migration.accessibleThrough(new Rule() {
-			
+
 			public boolean verification() {
-				if (instance.currentNode!=null) {
-					if (instance.currentNode.getDocument()!=null) {
-						return true ;
+				if (instance.currentNode != null) {
+					if (instance.currentNode.getDocument() != null) {
+						return true;
+					} else {
+						return false;
 					}
-					else {
-						return false ;
-					}
-				}
-				else {
-					return false ;
+				} else {
+					return false;
 				}
 			}
-			
+
 			public String ruleExplanation() {
 				// TODO Auto-generated method stub
 				return "The document must be set";
 			}
 		});
-		
-		// 	COMANDI delle fasi
-		
-		// comandi -  Connection Phase
-		
-		ColorLocalCommand connect ;
+
+		// COMANDI delle fasi
+
+		// comandi - Connection Phase
+
+		ColorLocalCommand connect;
 		final ColorLocalCommand ftp_connection;
-		connect = new ColorLocalCommand("connect","Connects to the server");
+		connect = new ColorLocalCommand("connect", "Connects to the server");
 		ftp_connection = ColorLocalCommand.getCommandByType(FTPConnectionConfiguration.class);
 		connect.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				if (ftp_connection.getSharedObject()!=null) {
+				if (ftp_connection.getSharedObject() != null) {
 					FTPConnectionConfiguration c = ftp_connection.getSharedObject();
 					if (c.isCompleted()) {
 						if (JjDom.isConnected()) {
@@ -1062,95 +1059,236 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 						}
 						JjDom.connect(c.getHost(), c.getUsername(), c.getPassword());
 						if (JjDom.isConnected()) {
-							return positiveMsg("Successfully connected");
-						}
-						else {
+							return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+									+ j£.colors("]", Color.DEFAULT) + " Successfully connected");
+						} else {
 							return error("Connection failed");
 						}
-					}
-					else {
+					} else {
 						return error("The configuration is not complete");
 					}
-				}
-				else if(instance.configuration.ftp_conn!=null) {
+				} else if (instance.configuration.ftp_conn != null) {
 					if (instance.configuration.ftp_conn.isCompleted()) {
 						if (JjDom.isConnected()) {
 							JjDom.closeConnection();
 						}
-						JjDom.connect(instance.configuration.ftp_conn.getHost(), instance.configuration.ftp_conn.getUsername(), instance.configuration.ftp_conn.getPassword());
+						JjDom.connect(instance.configuration.ftp_conn.getHost(),
+								instance.configuration.ftp_conn.getUsername(),
+								instance.configuration.ftp_conn.getPassword());
 						if (JjDom.isConnected()) {
-							return positiveMsg("Successfully connected");
-						}
-						else {
+							return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+									+ j£.colors("]", Color.DEFAULT) + " Successfully connected");
+						} else {
 							return error("Connection failed");
 						}
-					}
-					else {
+					} else {
 						return error("The configuration is not complete");
 					}
-				}
-				else {
+				} else {
 					return error("No connection set");
 				}
 			}
 		});
-		
+
 		instance.addCommandsToPhase(connection, ftp_connection, connect);
-		
-		// comandi Migration Phase :
-		
-		final ColorLocalCommand migrate = new ColorLocalCommand("migrate","Migrate the document to the server");
-		
+
+		// comandi Migration Phase : questo comando viene eseguito solo se la fase a cui appartiene è soddisfatta:
+		// e cioè quindi, se il documento esiste
+
+		final ColorLocalCommand migrate = new ColorLocalCommand("migrate", "Migrate the document to the server");
+		migrate.validExecution(When.IF_ACCESSIBLE);
 		migrate.setExecution(new Execution() {
-			
+
 			@Override
 			public Object exec() {
-				if (ftp_connection.getSharedObject()!=null) {
+				if (ftp_connection.getSharedObject() != null) {
 					FTPConnectionConfiguration c = ftp_connection.getSharedObject();
 					if (c.isCompleted()) {
 						if (JjDom.isConnected()) {
-							if (c.getUrlResource()==null) {
+							if (c.getUrlResource() == null) {
 								System.out.print("Url-Resource:");
 								String urlResource = £._I();
 								c.setUrlResource(urlResource);
 							}
-							JjDom.migrate(c.getUrlResource(), instance.currentNode.getDocument());
-							return null ;
-						}
-						else {
+							if (!JjDom.isMigrated()) {
+								// se non è stato migrato, lo migro
+								JjDom.migrate(c.getUrlResource(), instance.currentNode.getDocument(), false);
+								if (JjDom.isMigrated()) {
+									// The migration has happened successfully
+									return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+											+ j£.colors("]", Color.DEFAULT)
+											+ " The migration has happened successfully");
+								} else {
+									return error("Failed migration");
+								}
+							} else {
+								return error("The document has already been migrated");
+							}
+						} else {
 							return error("No connection");
 						}
-					}
-					else {
+					} else {
 						return error("The configuration is not complete");
 					}
-				}
-				else if(instance.configuration.ftp_conn!=null) {
+				} else if (instance.configuration.ftp_conn != null) {
 					if (instance.configuration.ftp_conn.isCompleted()) {
 						if (JjDom.isConnected()) {
-							if (instance.configuration.ftp_conn.getUrlResource()==null) {
-								System.out.print("Url-Resource:");
-								String urlResource = £._I();
-								instance.configuration.ftp_conn.setUrlResource(urlResource);
+							if (instance.configuration.ftp_conn.getUrlResource() != null) {
+								if (!JjDom.isMigrated()) {
+									JjDom.migrate(instance.configuration.ftp_conn.getUrlResource(),
+											instance.currentNode.getDocument(), false);
+									if (JjDom.isMigrated()) {
+										// The migration has happened successfully
+										return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+												+ j£.colors("]", Color.DEFAULT)
+												+ " The migration has happened successfully");
+									} else {
+										return error("Failed migration");
+									}
+								} else {
+									return error("The document has already been migrated");
+								}
+							} else {
+								return null;
 							}
-							JjDom.migrate(instance.configuration.ftp_conn.getUrlResource(), instance.currentNode.getDocument());
-							return null ;
-						}
-						else {
+						} else {
 							return error("No connection");
 						}
-					}
-					else {
+					} else {
 						return error("The configuration is not complete");
 					}
-				}
-				else {
+				} else {
 					return error("No connection set");
 				}
 			}
 		});
-		
+
 		instance.addCommandsToPhase(migration, migrate);
+		
+		// comandi download Phase :
+				final ColorLocalCommand downloadCommand = new ColorLocalCommand("download", "Download the document");
+				downloadCommand.setExecution(new Execution() {
+
+					@Override
+					public Object exec() {
+						if (ftp_connection.getSharedObject() != null) {
+							FTPConnectionConfiguration c = ftp_connection.getSharedObject();
+							if (c.isCompleted()) {
+								if (JjDom.isConnected()) {
+
+									// a questo punto mi serve l'url resource
+									if (c.getUrlResource() == null) {
+										System.out.print("Url-Resource:");
+										String inputUrlResource = £._I();
+										c.setUrlResource(inputUrlResource);
+									}
+									
+									instance.currentNode = JjDom.download(c.getUrlResource());
+									if (JjDom.isDownloaded()) {
+										return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+										+ j£.colors("]", Color.DEFAULT)
+										+ " Document downloaded successfully");
+									}
+									else {
+										return error("Problems downloading the document");
+									}
+									
+								} else {
+									return error("No connection");
+								}
+							} else {
+								return error("The configuration is not complete");
+							}
+						} else if (instance.configuration.ftp_conn != null) {
+							if (instance.configuration.ftp_conn.isCompleted()) {
+								if (instance.configuration.ftp_conn.getUrlResource()!=null) {
+									if (JjDom.isConnected()) {
+										instance.currentNode = JjDom.download(instance.configuration.ftp_conn.getUrlResource());
+										if (JjDom.isDownloaded()) {
+											return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+											+ j£.colors("]", Color.DEFAULT)
+											+ " Document downloaded successfully");
+										}
+										else {
+											return error("Problems downloading the document");
+										}
+									}
+									else {
+										return error("No connection");
+									}
+								}
+								else {
+									return null ;
+								}
+							} 
+							else {
+								return error("The configuration is not complete");
+							}	
+						} else {
+							return error("No connection set");
+						}
+					}
+				});
+				
+				instance.addCommandsToPhase(download,downloadCommand);
+				
+				// comandi update
+				
+				ColorLocalCommand updateCommand = new ColorLocalCommand("update","Update the document");
+				updateCommand.setExecution(new Execution() {
+					
+					@Override
+					public Object exec() {
+						if (ftp_connection.getSharedObject()!=null) {
+							FTPConnectionConfiguration c = ftp_connection.getSharedObject();
+							if (c.isCompleted()) {
+								if (JjDom.isConnected()) {
+									JjDom.update(instance.currentNode.getDocument());
+									if (JjDom.isMigrated()) {
+										return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+										+ j£.colors("]", Color.DEFAULT)
+										+ " Document updated successfully");
+									}
+									else {
+										return error("Update failed");
+									}
+								}
+								else {
+									return error("No connection");
+								}
+							}
+							else {
+								return error("The configuration is not complete");
+							}
+						}
+						else if(instance.configuration.ftp_conn!=null) {
+							if (instance.configuration.ftp_conn.isCompleted()) {
+								if (JjDom.isConnected()) {
+									JjDom.update(instance.currentNode.getDocument());
+									if (JjDom.isMigrated()) {
+										return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+										+ j£.colors("]", Color.DEFAULT)
+										+ " Document updated successfully");
+									}
+									else {
+										return error("Update failed");
+									}
+								}
+								else {
+									return error("No connection");
+								}
+							}
+							else {
+								return error("The configuration is not complete");
+							}
+						}
+						else {
+							return error("No connection set");
+						}
+					}
+				});
+				
+				instance.addCommandsToPhase(update, updateCommand);
 	}
 
 	private static void describeNodes(NodeList listNodes) {

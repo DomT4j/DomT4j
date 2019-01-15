@@ -86,7 +86,7 @@ public class FTPConnectionConfiguration implements Configurable {
 		else
 			return false;
 	}
-	@XmlElement
+	@XmlElement(name="url.resource")
 	public String getUrlResource() {
 		return urlResource;
 	}
