@@ -1038,6 +1038,23 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 				return "The document must be set";
 			}
 		});
+		
+		download.accessibleThrough(new Rule() {
+			
+			public boolean verification() {
+				if (instance.currentNode==null) {
+					return true ;
+				}
+				else {
+					return false ;
+				}
+			}
+			
+			public String ruleExplanation() {
+				// TODO Auto-generated method stub
+				return "There must not be a document in progress";
+			}
+		});
 
 		// COMANDI delle fasi
 
@@ -1167,6 +1184,7 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 		
 		// comandi download Phase :
 				final ColorLocalCommand downloadCommand = new ColorLocalCommand("download", "Download the document");
+				downloadCommand.validExecution(When.IF_ACCESSIBLE);
 				downloadCommand.setExecution(new Execution() {
 
 					@Override
@@ -1243,14 +1261,20 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 							FTPConnectionConfiguration c = ftp_connection.getSharedObject();
 							if (c.isCompleted()) {
 								if (JjDom.isConnected()) {
-									JjDom.update(instance.currentNode.getDocument());
-									if (JjDom.isMigrated()) {
-										return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
-										+ j£.colors("]", Color.DEFAULT)
-										+ " Document updated successfully");
+									if (!JjDom.isUpdated()) {
+										// se non è stato aggiornato, lo aggiorno
+										JjDom.update(instance.currentNode.getDocument());
+										if (JjDom.isUpdated()) {
+											return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+											+ j£.colors("]", Color.DEFAULT)
+											+ " Document updated successfully");
+										}
+										else {
+											return error("Update failed");
+										}
 									}
 									else {
-										return error("Update failed");
+										return error("The document has already been updated");
 									}
 								}
 								else {
@@ -1264,14 +1288,19 @@ public class DomT4j extends ColorLocalPhaseTerminal {
 						else if(instance.configuration.ftp_conn!=null) {
 							if (instance.configuration.ftp_conn.isCompleted()) {
 								if (JjDom.isConnected()) {
-									JjDom.update(instance.currentNode.getDocument());
-									if (JjDom.isMigrated()) {
-										return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
-										+ j£.colors("]", Color.DEFAULT)
-										+ " Document updated successfully");
+									if (!JjDom.isUpdated()) {
+										JjDom.update(instance.currentNode.getDocument());
+										if (JjDom.isUpdated()) {
+											return positiveMsg(j£.colors("[", Color.DEFAULT) + j£.colors("*", Color.CYAN)
+											+ j£.colors("]", Color.DEFAULT)
+											+ " Document updated successfully");
+										}
+										else {
+											return error("Update failed");
+										}
 									}
 									else {
-										return error("Update failed");
+										return error("The document has already been updated");
 									}
 								}
 								else {
